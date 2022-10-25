@@ -1,0 +1,50 @@
+ // // If the jack is in the closed set, then we have found the path
+        // int initial = Integer.MAX_VALUE;
+        // int x = jack.x;
+        // int y = jack.y;
+
+        // if(visited[x][y]) return initial;
+        
+        // // If the current cell is the treasure, then we have found the path
+        // if ((x == treasure.x && y == treasure.y) || iteration > 81) {
+        //     visited[x][y] = true;
+        //     if (cost < minCost) {
+        //         minCost = cost;
+        //         op = path;
+        //     }
+        //     return dp[x][y][cost] = Math.min(dp[x][y][cost], cost);
+        // }
+
+        // if(dp[x][y][cost] < 1000 ) return dp[x][y][cost];
+        // // Add the current cell to the closed array
+        // visited[x][y] = true;
+
+        // // If the current cell is not the treasure, then we have to find the path by checking all the neighbors of the current cell
+        // ArrayList<Cell> neighbors = new ArrayList<>();
+        // for(int i = x - 1; i <= x + 1; i++) {
+        //     for(int j = y - 1; j <= y + 1; j++) {
+        //         if (i == x && j == y) continue;
+        //         if (i < 0 || i > 8 || j < 0 || j > 8) continue;
+                
+        //         if (map[i][j].content.equals("non") || map[i][j].content.equals("treasure") || map[i][j].content.equals("tortuga")) {
+        //             neighbors.add(map[i][j]);
+        //         } else if (map[i][j].content.equals("kraken") && rum) {
+        //             neighbors.add(map[i][j]);
+        //             // Remove the kraken from the map and it's preceptions zone
+        //             map[i][j].content = "non";
+        //         }
+        //     }
+        // }
+
+        // for (Cell neighbor : neighbors) {
+        //     // prevent going back to the same cell
+        //     if (visited[neighbor.x][neighbor.y]) continue;
+        //     iteration++;
+        //     dp[x][y][cost] = Math.min( dp[x][y][cost], backtrack(map, visited, treasure, neighbor, path + "["+jack.x +","+ jack.y+"] ", cost + 1, rum, iteration));
+        // }
+        // // remove jack from the closed set
+        // visited[x][y] = false;
+        // return dp[x][y][cost];
+        
+        // Backtracking algorithm to find the path from the jack to the treasure using DP to avoid repeating the same path
+        // If the jack is in the closed set, then we have found the path
