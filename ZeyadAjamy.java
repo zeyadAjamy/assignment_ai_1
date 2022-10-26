@@ -7,35 +7,82 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Random;
 import java.util.Scanner;
 import java.util.Set;
 
+/**
+ * Represents a cell in the graph.
+ * 
+ * @author Zeyad Ajamy
+ */
 class Cell {
+    /**
+     * Represents the x coordinate of the cell.
+     */
     int x, y;
-    String content, status;
+    /**
+     * Represents the content of the cell.
+     * Expected values:
+     * non: empty cell
+     * kraken: kraken cell
+     * dutchman: dutchman cell
+     * treasure: treasure cell
+     * tortuga: tortuga cell
+     * jack: jack cell
+     * preKraken: one of the kraken's preception cells
+     * preDutchman: one of the dutchman's preception cells
+     * rock: rock cell
+     * kraken&rock: kraken and rock cell
+     * kraken&preDutchman: kraken and one of the dutchman's preception cells
+     */
+    String content;
+    /**
+     * Represents the state of the cell.
+     * 
+     * Expected values:
+     * rum: for jack if he has rum.
+     * safe: safe to move to.
+     * intact: healthy kraken cell.
+     * immortal: for rock and dutchman and the cells that cannot be moved to.
+     */
+    String status;
+    /**
+     * Represents the f in the f = g + h formula where g is the cost of the path
+     * from the start to the current cell and h is the heuristic cost of the path
+     * from the current cell to the end.
+     * 
+     * @intialValue Max value of an integer.
+     */
     int f = Integer.MAX_VALUE;
+
+    /**
+     * Represents the parent of the current cell.
+     * 
+     * @initialValue null.
+     */
     Cell parent = null;
 
-
-    public Cell(Cell other) {
-        this.x = other.x;
-        this.y = other.y;
-        this.content = other.content; // non, kraken, dutchman, rock, jack, kraken&rock, treasure, preKraken,or
-                                // tortuga
-        this.status = other.status; // (empty) for safe cells, (killed or intact) for kraken, (immortal) for rock
-                              // and dutchman, or (rum) for jack
-    }
+    /**
+     * Creates a cell with the given coordinates and content.
+     * 
+     * @param x       The x coordinate of the cell.
+     * @param y       The y coordinate of the cell.
+     * @param content The content of the cell.
+     * @param status  The status of the cell.
+     */
 
     public Cell(int x, int y, String content, String status) {
         this.x = x;
         this.y = y;
-        this.content = content; // non, kraken, dutchman, rock, jack, kraken&rock, treasure, preKraken,or
-                                // tortuga
-        this.status = status; // (empty) for safe cells, (killed or intact) for kraken, (immortal) for rock
-                              // and dutchman, or (rum) for jack
+        this.content = content;
+        this.status = status;
     }
 
+    /**
+     * Gets the number of parents of the current cell.
+     * 
+     * @return The number of parents of the current cell.
+     */
     public int getNumParent() {
         Cell temp = this;
         int count = 0;
@@ -46,15 +93,36 @@ class Cell {
         return count;
     }
 
+    /**
+     * Gets the coordinates of the current cell in the form of [x, y] string.
+     * 
+     * @return The coordinates of the current cell in the form of [x, y] string.
+     */
     @Override
     public String toString() {
-        return "Cell [x=" + x + ", y=" + y + "]";
+        return "[" + x + "," + y + "]";
     }
 }
 
+/**
+ * This program is a solution to the problem of finding the shortest path
+ * between two points in a graph using A* and backtracking algorithms.
+ * 
+ * @author Zeyad Ajamy
+ * @version 1.0
+ * @since 2022-10-26
+ */
 public class ZeyadAjamy {
-    
-    public static Boolean existInClosedSet(Cell[] closed, int x, int y) {
+    /**
+     * Determines whether the given cell coordinates are in the given list of cells.
+     *
+     * @param closed The list of cells of type Cell[]
+     * @param x      x coordinate of the cell of type int.
+     * @param y      y coordinate of the cell of type int.
+     * @return true if the given cell coordinates are in the given list of cells.
+     */
+
+    public static Boolean existInSet(Cell[] closed, int x, int y) {
         for (Cell cell : closed) {
             if (cell != null && cell.x == x && cell.y == y) {
                 return true;
@@ -62,160 +130,224 @@ public class ZeyadAjamy {
         }
         return false;
     }
-    
-    static int minCost = Integer.MAX_VALUE;
-    static String op = "";
 
-    public static Cell[][] handlekraken(Cell[][] map, Cell kraken){
+    /**
+     * Kill the kraken and remove its preception cells from the graph.
+     * 
+     * @param map    The graph of type Cell[][].
+     * @param kraken The kraken cell of type Cell.
+     * @return The graph after killing the kraken.
+     */
+
+    public static Cell[][] handlekraken(Cell[][] map, Cell kraken) {
         int x = kraken.x;
         int y = kraken.y;
 
         // Get all the precpetions of the kraken
-        for (int i = x-1; i <= x+1; i++) {
-            for (int j = y-1; j <= y+1; j++) {
+        for (int i = x - 1; i <= x + 1; i++) {
+            for (int j = y - 1; j <= y + 1; j++) {
                 if (i >= 0 && i < map.length && j >= 0 && j < map[0].length) {
-                    if (!(i == x || j == y)) continue; // only horizontal and vertical
-                    if (i < 0 || i > 8 || j < 0 || j > 8) continue; // out of bounds
-                    if(kraken.content.equals("kraken")){
-                        map[x][y].content = "non";
-                        map[i][j].status = "killed";
+                    if (!(i == x || j == y))
+                        continue; // only horizontal and vertical
+                    if (i < 0 || i > 8 || j < 0 || j > 8)
+                        continue; // out of bounds
+                    if (map[i][j].content.equals("preKraken")) {
                         map[i][j].content = "non";
-                    } else if(kraken.content.equals("kraken&rock")){
-                        map[x][y].content = "rock";
-                        map[i][j].status = "immortal";
-                        map[i][j].content = "non";
-                    } else if (kraken.content.equals("kraken&preDutchman")){
-                        map[x][y].content = "preDutchman";
-                        map[i][j].status = "immortal";
-                        map[i][j].content = "non";
+                        map[i][j].status = "safe";
                     }
-
                 }
             }
+        }
+
+        if (kraken.content.equals("kraken")) {
+            map[x][y].content = "non";
+            map[x][y].status = "safe";
+        } else if (kraken.content.equals("kraken&rock")) {
+            map[x][y].content = "rock";
+            map[x][y].status = "immortal";
+        } else if (kraken.content.equals("karaken&preDutchman")) {
+            map[x][y].content = "preDutchman";
+            map[x][y].status = "immortal";
         }
 
         return map;
     }
-    
-    public static String backtrack(Cell[][] map, Set<Cell> closed ,Cell treasure, Cell jack, boolean rum) {
-        // we got at most 8 possible moves
-        Cell[] moves = new Cell[8];
-        int i = 0; // number of moves available
-        if(jack.x == 4 && jack.y == 4){
-            String s = "";
-        }
-        for(int x = -1; x <= 1; x++) {
-            for(int y = -1; y <= 1; y++) {
-                if(x == 0 && y == 0) continue;
-                if(jack.x + x >= 0 && jack.x + x < map.length && jack.y + y >= 0 && jack.y + y < map[0].length) {
-                    moves[i++] = map[jack.x + x][jack.y + y];
+
+    /**
+     * Gets the path from the start to the end cell.
+     * 
+     * @note this method uses heuristics and backtracking to minimize the time and
+     *       space complexity.
+     *       however, it is not guaranteed to be the shortest path.
+     * @param map        The graph of type Cell[][].
+     * @param closed     The list of visited cells of type Set<Cell>.
+     * @param target     The end cell of type Cell.
+     * @param current    The current cell of type Cell.
+     * @param block_list The list of cells that cannot be moved to of type Set<Cell>.
+     * @param rum        boolean value that determines whether jack has rum or not of type boolean.
+     * @return The path from the start to the end cell or null if there is no path.
+     */
+    public static String backtrack(Cell[][] map, Set<Cell> closed, Cell target, Cell current, Set<Cell> block_list,
+            boolean rum) {
+        // add the current to the closed set
+        closed.add(current);
+
+        // find all possible moves from the current cell, at most 8 moves
+        ArrayList<Cell> moves = new ArrayList<Cell>();
+        int x = current.x;
+        int y = current.y;
+
+        boolean kraken_flag = false;
+        int kraken_x = 0;
+        int kraken_y = 0;
+        for (int i = x - 1; i <= x + 1; i++) {
+            for (int j = y - 1; j <= y + 1; j++) {
+                if (i >= 0 && i < map.length && j >= 0 && j < map[0].length) {
+                    if (i == x && j == y) {
+                        continue; // skip the current cell
+                    }
+                    if (i < 0 || i > 8 || j < 0 || j > 8) {
+                        continue; // out of bounds
+                    }
+                    if (map[i][j].content.equals("kraken")) {
+                        kraken_flag = true;
+                        kraken_x = i;
+                        kraken_y = j;
+                    }
+                    moves.add(map[i][j]);
                 }
             }
         }
 
-       
-        int min = Integer.MAX_VALUE;
-        Cell minCell = null;
-
-        for(Cell cell : moves) {
-            if(cell == null || !(cell.content.equals("non") || cell.content.equals("tortuga") || cell.content.equals("treasure") || cell.content.equals("kraken")
-            || cell.content.equals("kraken&rock") || cell.content.equals("kraken&preDutchman")) ){
-                continue;
-            }
-            // convert Set to Cell[]
-            Cell[] closedArray = closed.toArray(new Cell[closed.size()]);
-            if(cell.content.equals("kraken") || cell.content.equals("kraken&rock") || cell.content.equals("kraken&preDutchman")) {
-                if(!rum) continue;
-                handlekraken(map, cell);
-                // update the moves array
-                i = 0;
-                for(int x = -1; x <= 1; x++) {
-                    for(int y = -1; y <= 1; y++) {
-                        if(x == 0 && y == 0) continue;
-                        if(jack.x + x >= 0 && jack.x + x < map.length && jack.y + y >= 0 && jack.y + y < map[0].length) {
-                            moves[i++] = map[jack.x + x][jack.y + y];
+        // if the kraken exists, handle it
+        if (kraken_flag && rum) {
+            map = handlekraken(map, map[kraken_x][kraken_y]);
+            // update the moves list
+            moves = new ArrayList<Cell>();
+            for (int i = x - 1; i <= x + 1; i++) {
+                for (int j = y - 1; j <= y + 1; j++) {
+                    if (i >= 0 && i < map.length && j >= 0 && j < map[0].length) {
+                        if (i == x && j == y) {
+                            continue; // skip the current cell
                         }
+                        if (i < 0 || i > 8 || j < 0 || j > 8) {
+                            continue; // out of bounds
+                        }
+                        moves.add(map[i][j]);
                     }
                 }
             }
+        }
+        // find the optimal move from the possible moves
+        Cell optimal = null;
+        int min_hueristic = Integer.MAX_VALUE;
 
-            if(existInClosedSet(closedArray, cell.x, cell.y)){
-                continue;
+        // Optimal list
+        for (Cell move : moves) {
+            if ((move.content.equals("non") || move.content.equals("tortuga") || move.content.equals(target.content))
+                    && !existInSet(closed.toArray(new Cell[closed.size()]), move.x, move.y)) {
+                int dx = Math.abs(move.x - target.x);
+                int dy = Math.abs(move.y - target.y);
+                if (optimal == null) {
+                    min_hueristic = dx + dy;
+                    optimal = move;
+                } else {
+                    int d = dx + dy;
+                    if (d < min_hueristic) {
+                        min_hueristic = d;
+                        optimal = move;
+                    }
+                }
             }
-            if(cell.content.equals(treasure.content)){
-                min = 0;
-                minCell = cell;
-                break;
-            }
-            // Calculate the dx and dy of the current cell and the treasure
-            int dx = Math.abs(cell.x - treasure.x);
-            int dy = Math.abs(cell.y - treasure.y);
-            int temp = Math.max(dx, dy);
-            if(temp <= min) {
-                min = temp;
-                minCell = map[cell.x][cell.y]; // update the minCell
-            } 
         }
-        if (minCell == null) {
-            return null;
+        // add all the moves to the closed list except the optimal one
+        for (Cell move : moves) {
+            if (move != optimal) {
+                closed.add(move);
+            }
         }
 
-        // add the rest of the moves to the closed set
-        for(int j = 0; j < moves.length; j++) {
-            Cell tmp = moves[j];
-            if(tmp == null) continue;
-            if(tmp.x == minCell.x && tmp.y == minCell.y) continue;
-            closed.add(moves[j]);
-        }
+        // if the optimal move is null, then we have reached the end of the path
+        if (optimal == null) {
+            // Remove all the moves from the closed list except the optimal one and those in
+            // the block list
+            for (Cell move : moves) {
+                if (move != optimal && !block_list.contains(move)) {
+                    closed.remove(move);
+                }
+            }
 
-        minCell.parent = jack;
-        if (minCell.content.equals(treasure.content)) {
-            // trace back all the parents of the cell
-            Cell temp = minCell;
-            String tempPath = "";
-            while (temp.parent != null) {
-                tempPath +=  "["+temp.x + "," + temp.y + "] ";
-                temp = temp.parent;
+            // Backtrack using the parent of the current cell
+            if (current.parent != null) {
+                return backtrack(map, closed, target, current.parent, block_list, rum);
+            } else {
+                return null; // no path found
             }
-            tempPath += "["+temp.x + "," + temp.y + "] ";
-            String[] tempArr = tempPath.split(" ");
-            Collections.reverse(Arrays.asList(tempArr));
-            tempPath = "";
-            for (String string : tempArr) {
-                tempPath += string + " ";
+
+        } else {
+            // if the optimal is not our target, then continue the search
+            if (!optimal.content.equals(target.content)) {
+                // add the current to the parent of the optimal move
+                optimal.parent = current;
+
+                // add the optimal move to the block list
+                block_list.add(optimal);
+
+                // continue the search
+                return backtrack(map, closed, target, optimal, block_list, rum);
+            } else {
+                // trace all the parents of the optimal move to get the path and add these cells
+                // to arraylist
+                ArrayList<Cell> path = new ArrayList<Cell>();
+                // Add the optimal move to the path
+                path.add(optimal);
+                path.add(current);
+
+                // Add the rest of the parents to the path
+                Cell temp = current;
+                while (temp.parent != null) {
+                    path.add(temp.parent);
+                    temp = temp.parent;
+                }
+                // reverse the path
+                Collections.reverse(path);
+                // convert it to a string
+                String path_str = "";
+                for (Cell cell : path) {
+                    path_str += cell.toString() + " ";
+                }
+                // return the path
+                return path_str.trim();
             }
-            op = tempPath.trim();
-            return tempPath.trim();
         }
-        // Check if we can move to the cell
-        if (minCell.content.equals("non") || minCell.content.equals("treasure")) {
-            closed.add(minCell);
-            backtrack(map, closed, treasure, minCell, rum);
-        } else if (minCell.content.equals("tortuga")){
-            rum = true;
-            closed.add(minCell);
-            backtrack(map, closed, treasure, minCell, rum);
-        }
-        return op;
     }
 
-    public static Boolean existInOpenSet(ArrayList<Cell> openSet, int x, int y) {
-        for (Cell c : openSet) {
-            if (c.x == x && c.y == y) {
-                return true;
-            }
-        }
-        return false;
-    }
+    /**
+     * Gets the cell of the given x, y coordinates, if it exists in the given set.
+     * 
+     * @param searchingSet The set of cells to search in of type ArrayList<Cell>.
+     * @param x            The x coordinate of the cell of type int.
+     * @param y            The y coordinate of the cell of type int.
+     * @return True if the cell exists in the closed set, false otherwise.
+     */
 
-    public static Cell getCellFromOpenSet(ArrayList<Cell> openSet, int x, int y) {
-        for (Cell c : openSet) {
+    public static Cell getCellFromSet(ArrayList<Cell> searchingSet, int x, int y) {
+        for (Cell c : searchingSet) {
             if (c.x == x && c.y == y) {
                 return c;
             }
         }
         return null;
     }
+
+    /**
+     * Calculates the cell huristic value.
+     * @param map The map of the game.
+     * @param x The x coordinate of the cell of type int.
+     * @param y The y coordinate of the cell of type int.
+     * @param treasure The treasure cell of type Cell.
+     * @return The huristic value of the cell.
+     */
 
     public static int calculateHeuristic(Cell[][] map, int x, int y, Cell treasure) {
         int xTreasure = treasure.x;
@@ -225,140 +357,43 @@ public class ZeyadAjamy {
         int max = Math.max(xDiff, yDiff);
         return max;
     }
-    
-    public static boolean addKraken(Cell[][] map, int x, int y) {
-        if (x < 0 || x > 8 || y < 0 || y > 8) return false;
-        if (map[x][y].content.equals("non")) {
-            map[x][y].content = "kraken";
-            for(int i = x - 1; i <= x + 1; i++) {
-                for(int j = y - 1; j <= y + 1; j++) {
-                    if (!(i == x || j == y)) continue;
-                    if (i < 0 || i > 8 || j < 0 || j > 8) continue;
-                    if (map[i][j].content.equals("non")) {
-                        map[i][j].content = "preKraken";
-                    }
-                }
-            }
 
-            return true;
-        } else if (map[x][y].content.equals("rock")) {
-            map[x][y].content = "kraken&rock";
-            for(int i = x - 1; i <= x + 1; i++) {
-                for(int j = y - 1; j <= y + 1; j++) {
-                    if (!(i == x || j == y)) continue;
-                    if (i < 0 || i > 8 || j < 0 || j > 8) continue;
-                    if (map[i][j].content.equals("non")) {
-                        map[i][j].content = "preKraken";
-                    }
-                }
-            }
-            return true;
-        } else if (map[x][y].content.equals("preDutchman")) {
-            map[x][y].content = "kraken&preDutchman";
-            for(int i = x - 1; i <= x + 1; i++) {
-                for(int j = y - 1; j <= y + 1; j++) {
-                    if (!(i == x || j == y)) continue;
-                    if (i < 0 || i > 8 || j < 0 || j > 8) continue;
-                    if (map[i][j].content.equals("non")) {
-                        map[i][j].content = "preKraken";
-                    }
-                }
-            }
-            return true;
-        }
-        return false;
-    }
-
-    public static boolean flyingDutchman(Cell[][] map, int x, int y) {
-        if (x < 0 || x > 8 || y < 0 || y > 8) return false;
-        if (map[x][y].content.equals("non")) {
-            map[x][y].content = "dutchman";
-            // Add preceptions zone
-            for(int i = x - 1; i <= x + 1; i++) {
-                for(int j = y - 1; j <= y + 1; j++) {
-                    if (i == x && j == y) continue;
-                    if (i < 0 || i > 8 || j < 0 || j > 8) continue;
-                    if (map[i][j].content.equals("non")) {
-                        map[i][j].content = "preDutchman";
-                    }
-                }
-            }
-            return true;
-        } 
-        return false;
-    }
-
-    public static boolean addRock(Cell[][] map, int x, int y) {
-        if (x < 0 || x > 8 || y < 0 || y > 8) return false;
-        if (map[x][y].content.equals("non")) {
-            map[x][y].content = "rock";
-        } else if (map[x][y].content.equals("kraken")) {
-            map[x][y].content = "kraken&rock";
-        } else if (map[x][y].content.equals("preDutchman")) {
-            map[x][y].content = "preDutchman";
-            map[x][y].status = "immortal";
-
-        } else if (map[x][y].content.equals("preKraken")) {
-            map[x][y].content = "rock";
-            map[x][y].status = "immortal";
-        }
-        return true;
-    }
-
-    public static boolean addTortuga(Cell[][] map, int x, int y) {
-        if (x < 0 || x > 8 || y < 0 || y > 8) return false;
-        if (map[x][y].content.equals("non")) {
-            map[x][y].content = "tortuga";
-            return true;
-        } else if (map[x][y].content.equals("jack")) {
-            map[x][y].content = "jack";
-            map[x][y].status = "rum";
-            return true;
-        }
-        return false;
-    }
-
-    public static boolean addTreasure(Cell[][] map, int x, int y) {
-        if (x < 0 || x > 8 || y < 0 || y > 8) return false;
-        if(x == 0 && y == 0) return false; // cannot be in the origin
-        if (map[x][y].content.equals("non")) {
-            map[x][y].content = "treasure";
-            return true;
-        }
-        return false;
-    }
-
-    public static boolean addJack(Cell[][] map, int x, int y) {
-        if (x != 0 && y != 0) {
-            return false;
-        }
-        if (map[x][y].content.equals("non")) {
-            map[x][y].content = "jack";
-        }
-        return true;
-    }
-    
-    public static String aStar(Cell[][] map, Cell jack, Cell treasure, int x, int y, Set<Cell> open, Set<Cell> closed, boolean rum) {
+    /**
+     * Applies the A* algorithm to the given map. to find the optimal path to the given target.
+     * @param map The map of the game of type Cell[][].
+     * @param jack The jack cell of type Cell.
+     * @param treasure The treasure cell of type Cell.
+     * @param x The x coordinate of the cell of type int.
+     * @param y The y coordinate of the cell of type int.
+     * @param open The open set of type Set<Cell>.
+     * @param closed The closed set of type Set<Cell>.
+     * @param rum The rum flag of type boolean.
+     * @param variant The variant of the algorithm of type int.
+     * @return The optimal path to the target, or null if no path is found.
+     */
+    public static String aStar(Cell[][] map, Cell jack, Cell treasure, int x, int y, Set<Cell> open, Set<Cell> closed,
+            boolean rum, int variant) {
 
         // add the current cell to the closed list
         ArrayList<Cell> openSet = new ArrayList<Cell>(open);
         ArrayList<Cell> closedSet = new ArrayList<Cell>(closed);
         Cell[] array = new Cell[closed.size()];
-        // Check all the neighbors of the current cell using for loops
+        Cell[] array2 = new Cell[open.size()];
+        // Check all the neighbors of the current cell
         for (int i = x - 1; i <= x + 1; i++) {
             for (int j = y - 1; j <= y + 1; j++) {
                 // Check if the neighbor is valid
                 if (i >= 0 && i < 9 && j >= 0 && j < 9) {
                     // Check if the neighbor is not in the closed list
-                    if (!existInClosedSet(closedSet.toArray(array) , i, j)) {
+                    if (!existInSet(closedSet.toArray(array), i, j)) {
 
                         String content = map[i][j].content;
                         int h = calculateHeuristic(map, i, j, treasure);
                         int g = map[x][y].getNumParent() + 1;
                         int f = h + g;
 
-                        if (existInOpenSet(openSet, i, j)) {
-                            Cell old = getCellFromOpenSet(openSet, i, j);
+                        if (existInSet(openSet.toArray(array2), i, j) && map[i][j].parent != null) {
+                            Cell old = getCellFromSet(openSet, i, j);
                             if (old.f > f) {
                                 old.f = f;
                                 map[i][j].parent = map[x][y];
@@ -368,7 +403,7 @@ public class ZeyadAjamy {
                             map[i][j].parent = map[x][y];
                         }
 
-                        if (!existInOpenSet(openSet, i, j) && (content.equals("non") || content.equals("treasure"))) {
+                        if (!existInSet(openSet.toArray(array2), i, j) && (content.equals("non") || content.equals("treasure"))) {
                             open.add(map[i][j]);
                         } else if (content.equals("tortuga")) {
                             open.add(map[i][j]);
@@ -382,28 +417,31 @@ public class ZeyadAjamy {
                                 Set<Cell> neighbors = new HashSet<>();
                                 for (int k = i - 1; k <= i + 1; k++) {
                                     for (int l = j - 1; l <= j + 1; l++) {
-                                        if (!(k == i || l == j)) continue;
-                                        if (k < 0 || k > 8 || l < 0 || l > 8) continue;
+                                        if (!(k == i || l == j))
+                                            continue;
+                                        if (k < 0 || k > 8 || l < 0 || l > 8)
+                                            continue;
                                         if (map[k][l].content.equals("preKraken")) {
                                             map[k][l].content = "non";
                                             neighbors.add(map[k][l]);
                                         }
-                                        // Remove the preKraken from the closed 
-                                        for(Cell c: closed){
-                                            if(c.x == k && c.y == l){
+                                        // Remove the preKraken from the closed
+                                        for (Cell c : closed) {
+                                            if (c.x == k && c.y == l) {
                                                 closed.remove(c);
                                                 break;
                                             }
                                         }
-                                        
+
                                     }
                                 }
-                                
-                                // If one of the neighbors of the kraken is the neighbor of the current cell, then we have to add it to the open set
-                                for(Cell neighbor : neighbors){
-                                    for(int k = x - 1; k <= x + 1; k++){
-                                        for(int l = y - 1; l <= y + 1; l++){
-                                            if(k == neighbor.x && l == neighbor.y){
+
+                                // If one of the neighbors of the kraken is the neighbor of the current cell,
+                                // then we have to add it to the open set
+                                for (Cell neighbor : neighbors) {
+                                    for (int k = x - 1; k <= x + 1; k++) {
+                                        for (int l = y - 1; l <= y + 1; l++) {
+                                            if (k == neighbor.x && l == neighbor.y) {
                                                 map[k][l].parent = map[x][y];
                                                 int h1 = calculateHeuristic(map, neighbor.x, neighbor.y, treasure);
                                                 int g1 = map[k][l].getNumParent() + 1;
@@ -414,39 +452,42 @@ public class ZeyadAjamy {
                                         }
                                     }
                                 }
-                                
+
                                 closed.add(map[x][y]);
                             }
-                        } else if(content.equals("kraken&rock")){ 
-                            if(rum){
+                        } else if (content.equals("kraken&rock")) {
+                            if (rum) {
                                 map[i][j].content = "rock";
                                 map[i][j].status = "immortal";
                                 // Remove the kraken from the map and it's preceptions zone.
                                 Set<Cell> neighbors = new HashSet<>();
                                 for (int k = i - 1; k <= i + 1; k++) {
                                     for (int l = j - 1; l <= j + 1; l++) {
-                                        if (!(k == i || l == j)) continue;
-                                        if (k < 0 || k > 8 || l < 0 || l > 8) continue;
+                                        if (!(k == i || l == j))
+                                            continue;
+                                        if (k < 0 || k > 8 || l < 0 || l > 8)
+                                            continue;
                                         if (map[k][l].content.equals("preKraken")) {
                                             map[k][l].content = "non";
                                             neighbors.add(map[k][l]);
                                         }
-                                        // Remove the preKraken from the closed 
-                                        for(Cell c: closed){
-                                            if(c.x == k && c.y == l){
+                                        // Remove the preKraken from the closed
+                                        for (Cell c : closed) {
+                                            if (c.x == k && c.y == l) {
                                                 closed.remove(c);
                                                 break;
                                             }
                                         }
-                                        
+
                                     }
                                 }
-                                
-                                // If one of the neighbors of the kraken is the neighbor of the current cell, then we have to add it to the open set
-                                for(Cell neighbor : neighbors){
-                                    for(int k = x - 1; k <= x + 1; k++){
-                                        for(int l = y - 1; l <= y + 1; l++){
-                                            if(k == neighbor.x && l == neighbor.y){
+
+                                // If one of the neighbors of the kraken is the neighbor of the current cell,
+                                // then we have to add it to the open set
+                                for (Cell neighbor : neighbors) {
+                                    for (int k = x - 1; k <= x + 1; k++) {
+                                        for (int l = y - 1; l <= y + 1; l++) {
+                                            if (k == neighbor.x && l == neighbor.y) {
                                                 map[k][l].parent = map[x][y];
                                                 int h1 = calculateHeuristic(map, neighbor.x, neighbor.y, treasure);
                                                 int g1 = map[k][l].getNumParent() + 1;
@@ -457,12 +498,12 @@ public class ZeyadAjamy {
                                         }
                                     }
                                 }
-                                
+
                                 closed.add(map[x][y]);
                                 closed.add(map[i][j]);
                             }
                         } else if (content.equals("kraken&preDutchman")) {
-                            if(rum){
+                            if (rum) {
                                 map[x][y].content = "preDutchman";
                                 map[x][y].status = "immortal";
 
@@ -470,30 +511,59 @@ public class ZeyadAjamy {
                                 Set<Cell> neighbors = new HashSet<>();
                                 for (int k = i - 1; k <= i + 1; k++) {
                                     for (int l = j - 1; l <= j + 1; l++) {
-                                        if (!(k == i || l == j)) continue;
-                                        if (k < 0 || k > 8 || l < 0 || l > 8) continue;
+                                        if (!(k == i || l == j))
+                                            continue;
+                                        if (k < 0 || k > 8 || l < 0 || l > 8)
+                                            continue;
                                         if (map[k][l].content.equals("preKraken")) {
                                             map[k][l].content = "non";
                                             neighbors.add(map[k][l]);
                                         }
-                                        // Remove the preKraken from the closed 
-                                        for(Cell c: closed){
-                                            if(c.x == k && c.y == l){
+                                        // Remove the preKraken from the closed
+                                        for (Cell c : closed) {
+                                            if (c.x == k && c.y == l) {
                                                 closed.remove(c);
                                                 break;
                                             }
                                         }
-                                        
+
                                     }
                                 }
                                 closed.add(map[x][y]);
                                 closed.add(map[i][j]);
 
                             }
-                        } else if(!(content.equals("non") || content.equals("treasure"))) {
+                        } else if (!(content.equals("non") || content.equals("treasure"))) {
                             closed.add(map[i][j]);
                         }
                     }
+                }
+            }
+        }
+
+        if (variant == 2) {
+            // Will add some more preceptions to jack
+            ArrayList<Cell> extraPreceptions = new ArrayList<>();
+            if (x + 2 < 9) {
+                extraPreceptions.add(map[x + 2][y]);
+            }
+            if (x - 2 >= 0) {
+                extraPreceptions.add(map[x - 2][y]);
+            }
+            if (y + 2 < 9) {
+                extraPreceptions.add(map[x][y + 2]);
+            }
+            if (y - 2 >= 0) {
+                extraPreceptions.add(map[x][y - 2]);
+            }
+
+            for (Cell cell : extraPreceptions) {
+                if (existInSet(array, x, y)) {
+                    continue;
+                }
+                String content = cell.content;
+                if (content.equals("non") || content.equals("treasure") || content.equals("tortuga")) {
+                    open.add(cell);
                 }
             }
         }
@@ -561,10 +631,16 @@ public class ZeyadAjamy {
             return pathString.trim();
         } else {
             // otherwise, move to the next cell
-            return aStar(map, jack, treasure, next.x, next.y, open, closed, rum);
+            return aStar(map, jack, treasure, next.x, next.y, open, closed, rum, variant);
         }
     }
 
+    /**
+     * Prints out a string to specific file
+     * @param output the string to be printed out. Type String
+     * @param fileName the name of the file. Type String.
+     * @throws IOException
+     */
     public static void printOutput(String output, String fileName) throws IOException {
         File file = new File(fileName);
         FileWriter writer = new FileWriter(file);
@@ -572,6 +648,180 @@ public class ZeyadAjamy {
         writer.close();
     }
 
+    /**
+     * Add the kraken to the map and it's preceptions zone.
+     * @param map the map. Type Cell[][]
+     * @param x the x coordinate of the cell to be added. Type int
+     * @param y the y coordinate of the cell to be added. Type int
+     * @return true if the kraken is allowed to be added according to the task, false otherwise.
+     */
+    public static boolean addKraken(Cell[][] map, int x, int y) {
+        if (x < 0 || x > 8 || y < 0 || y > 8)
+            return false;
+        if (map[x][y].content.equals("non")) {
+            map[x][y].content = "kraken";
+            for (int i = x - 1; i <= x + 1; i++) {
+                for (int j = y - 1; j <= y + 1; j++) {
+                    if (!(i == x || j == y))
+                        continue;
+                    if (i < 0 || i > 8 || j < 0 || j > 8)
+                        continue;
+                    if (map[i][j].content.equals("non")) {
+                        map[i][j].content = "preKraken";
+                    }
+                }
+            }
+
+            return true;
+        } else if (map[x][y].content.equals("rock")) {
+            map[x][y].content = "kraken&rock";
+            for (int i = x - 1; i <= x + 1; i++) {
+                for (int j = y - 1; j <= y + 1; j++) {
+                    if (!(i == x || j == y))
+                        continue;
+                    if (i < 0 || i > 8 || j < 0 || j > 8)
+                        continue;
+                    if (map[i][j].content.equals("non")) {
+                        map[i][j].content = "preKraken";
+                    }
+                }
+            }
+            return true;
+        } else if (map[x][y].content.equals("preDutchman")) {
+            map[x][y].content = "kraken&preDutchman";
+            for (int i = x - 1; i <= x + 1; i++) {
+                for (int j = y - 1; j <= y + 1; j++) {
+                    if (!(i == x || j == y))
+                        continue;
+                    if (i < 0 || i > 8 || j < 0 || j > 8)
+                        continue;
+                    if (map[i][j].content.equals("non")) {
+                        map[i][j].content = "preKraken";
+                    }
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Add the Dutchman to the map and it's preceptions zone.
+     * @param map the map to be added. Type Cell[][]
+     * @param x the x coordinate of the cell to be added. Type int
+     * @param y the y coordinate of the cell to be added. Type int
+     * @return true if the Dutchman is allowed to be added according to the task, false otherwise.
+     */
+
+    public static boolean flyingDutchman(Cell[][] map, int x, int y) {
+        if (x < 0 || x > 8 || y < 0 || y > 8)
+            return false;
+        if (map[x][y].content.equals("non")) {
+            map[x][y].content = "dutchman";
+            // Add preceptions zone
+            for (int i = x - 1; i <= x + 1; i++) {
+                for (int j = y - 1; j <= y + 1; j++) {
+                    if (i == x && j == y)
+                        continue;
+                    if (i < 0 || i > 8 || j < 0 || j > 8)
+                        continue;
+                    if (map[i][j].content.equals("non")) {
+                        map[i][j].content = "preDutchman";
+                    }
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Add the rock to the map.
+     * @param map the map  to be added. Type Cell[][]
+     * @param x the x coordinate of the cell to be added. Type int
+     * @param y the y coordinate of the cell to be added. Type int
+     * @return true if the rock is allowed to be added according to the task, false otherwise.
+     */
+    public static boolean addRock(Cell[][] map, int x, int y) {
+        if (x < 0 || x > 8 || y < 0 || y > 8)
+            return false;
+        if (map[x][y].content.equals("non")) {
+            map[x][y].content = "rock";
+        } else if (map[x][y].content.equals("kraken")) {
+            map[x][y].content = "kraken&rock";
+        } else if (map[x][y].content.equals("preDutchman")) {
+            map[x][y].content = "preDutchman";
+            map[x][y].status = "immortal";
+
+        } else if (map[x][y].content.equals("preKraken")) {
+            map[x][y].content = "rock";
+            map[x][y].status = "immortal";
+        }
+        return true;
+    }
+
+    /**
+     * Add the tortuga to the map.
+     * @param map the map to be added. Type Cell[][]
+     * @param x the x coordinate of the cell to be added. Type int
+     * @param y the y coordinate of the cell to be added. Type int
+     * @return true if the tortuga is allowed to be added according to the task, false otherwise.
+     */
+    public static boolean addTortuga(Cell[][] map, int x, int y) {
+        if (x < 0 || x > 8 || y < 0 || y > 8)
+            return false;
+        if (map[x][y].content.equals("non")) {
+            map[x][y].content = "tortuga";
+            return true;
+        } else if (map[x][y].content.equals("jack")) {
+            map[x][y].content = "jack";
+            map[x][y].status = "rum";
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Add the tresure cell to the map.
+     * @param map the map to be added. Type Cell[][]
+     * @param x the x coordinate of the cell to be added. Type int
+     * @param y the y coordinate of the cell to be added. Type int
+     * @return true if the tresure is allowed to be added according to the task, false otherwise.
+     */
+    public static boolean addTreasure(Cell[][] map, int x, int y) {
+        if (x < 0 || x > 8 || y < 0 || y > 8)
+            return false;
+        if (x == 0 && y == 0)
+            return false; // cannot be in the origin
+        if (map[x][y].content.equals("non")) {
+            map[x][y].content = "treasure";
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Add the jack to the map.
+     * @param map the map to be added. Type Cell[][]
+     * @param x the x coordinate of the cell to be added. Type int
+     * @param y the y coordinate of the cell to be added. Type int
+     * @return true if the jack is allowed to be added according to the task, false otherwise.
+     */
+    public static boolean addJack(Cell[][] map, int x, int y) {
+        if (x != 0 && y != 0) {
+            return false;
+        }
+        if (map[x][y].content.equals("non")) {
+            map[x][y].content = "jack";
+        }
+        return true;
+    }
+
+    /**
+     * Makes a copy of the map. To avoid changing the original map.
+     * @param map the map to be copied. Type Cell[][]
+     * @return the copy of the map
+     */
     public static Cell[][] makeMapCopy(Cell[][] map) {
         Cell[][] copy = new Cell[map.length][map[0].length];
         for (int i = 0; i < map.length; i++) {
@@ -592,18 +842,19 @@ public class ZeyadAjamy {
             }
         }
 
-        try (// Ask the user if he/ she wants to generate a random map or input one or read from input.txt
-        Scanner scanner = new Scanner(System.in)) {
+        try (// Ask the user if he/ she wants to generate a random map or input one or read
+             // from input.txt
+                Scanner scanner = new Scanner(System.in)) {
             System.out.println("Please enter the number of the variant you want to run:");
             System.out.println("1. Random map");
             System.out.println("2. Input map and preception' senario");
             System.out.println("3. Read from input.txt");
             int userVariant = scanner.nextInt();
-            if( userVariant < 1 || userVariant > 3){
+            if (userVariant < 1 || userVariant > 3) {
                 System.out.println("Invalid input");
                 return;
             }
-            if(userVariant == 1){
+            if (userVariant == 1) {
                 // Add jack to the map
                 // rand is the random number between 1 and 2
                 variant = (int) (Math.random() * 2) + 1;
@@ -618,7 +869,7 @@ public class ZeyadAjamy {
                 addTortuga(cells, to_x, to_y);
                 tortuga = cells[to_x][to_y];
                 // Add treasure to the map
-                // Rand number between 1 and 7 and not equal to tortuga 
+                // Rand number between 1 and 7 and not equal to tortuga
                 int tr_x = (int) (Math.random() * 7) + 1;
                 int tr_y = (int) (Math.random() * 7) + 1;
                 while (tr_x == to_x && tr_y == to_y) {
@@ -628,16 +879,18 @@ public class ZeyadAjamy {
                 addTreasure(cells, tr_x, tr_y);
                 treasure = cells[tr_x][tr_y];
                 // Add kraken to the map
-                // Rand number between 1 and 7 and atleast 1 cells away from tortuga, treasure, jack
+                // Rand number between 1 and 7 and atleast 1 cells away from tortuga, treasure,
+                // jack
                 int kr_x = (int) (Math.random() * 7) + 3;
                 int kr_y = (int) (Math.random() * 7) + 3;
                 while (!addKraken(cells, kr_x, kr_y)) {
                     kr_x = (int) (Math.random() * 7) + 3;
                     kr_y = (int) (Math.random() * 7) + 3;
-                } 
+                }
 
-                // Add the rocks to the map 
-                // Rand number between 1 and 7 and atleast 1 cells away from tortuga, treasure, jack
+                // Add the rocks to the map
+                // Rand number between 1 and 7 and atleast 1 cells away from tortuga, treasure,
+                // jack
                 int ro_x = (int) (Math.random() * 7) + 1;
                 int ro_y = (int) (Math.random() * 7) + 1;
                 while (!addRock(cells, ro_x, ro_y)) {
@@ -646,7 +899,8 @@ public class ZeyadAjamy {
                 }
 
                 // Add the Flying Dutchman to the map
-                // Rand number between 3 and 7 and atleast 2 cells away from tortuga, treasure, jack
+                // Rand number between 3 and 7 and atleast 2 cells away from tortuga, treasure,
+                // jack
                 int fd_x = (int) (Math.random() * 7) + 3;
                 int fd_y = (int) (Math.random() * 7) + 3;
                 while (!flyingDutchman(cells, fd_x, fd_y)) {
@@ -655,12 +909,12 @@ public class ZeyadAjamy {
                 }
             }
 
-            if(userVariant == 2){
+            if (userVariant == 2) {
                 // Read the input from the user and add the map to the cells
                 // Scanner userInput = new Scanner(System.in);
                 System.out.println("Please enter the map in one line:");
                 // Read the input from the user console
-                try{
+                try {
                     // read the line with spaces
                     String line1 = scanner.nextLine();
                     line1 = scanner.nextLine();
@@ -685,29 +939,29 @@ public class ZeyadAjamy {
                         int x = Integer.parseInt(position[0]);
                         int y = Integer.parseInt(position[1]);
                         boolean check = true;
-                        if( j == 0){
+                        if (j == 0) {
                             check = addJack(cells, x, y);
                             jack = cells[x][y];
                         }
-                        
-                        if (j == 1){
+
+                        if (j == 1) {
                             check = flyingDutchman(cells, x, y);
                         }
-                        
-                        if (j == 2){
+
+                        if (j == 2) {
                             check = addKraken(cells, x, y);
                         }
-                        
-                        if (j == 3){
+
+                        if (j == 3) {
                             check = addRock(cells, x, y);
                         }
-                        
-                        if (j == 4){
+
+                        if (j == 4) {
                             check = addTreasure(cells, x, y);
                             treasure = cells[x][y];
                         }
-                        
-                        if (j == 5){
+
+                        if (j == 5) {
                             check = addTortuga(cells, x, y);
                             tortuga = cells[x][y];
                         }
@@ -716,29 +970,30 @@ public class ZeyadAjamy {
                             return;
                         }
                     }
-                    
+
                     // Read the second line
                     System.out.println("Please enter the senario in one line:");
                     line1 = scanner.nextLine();
 
-                    try { 
+                    try {
                         int senario = Integer.parseInt(String.valueOf(line1.trim()));
                         // Add the senario to the cells
                         if (senario < 1 || senario > 2) {
                             System.out.println("Invalid input: Please enter 6 postions!");
                             return;
                         }
-                    } catch(NumberFormatException e){
+                        variant = senario;
+                    } catch (NumberFormatException e) {
                         System.out.println("Invalid input: Please enter a number!");
                         return;
                     }
-                } catch(Exception e){
+                } catch (Exception e) {
                     System.out.println("Invalid input: Please enter a number!");
                     return;
                 }
             }
 
-            if(userVariant == 3 ){
+            if (userVariant == 3) {
                 try {
                     BufferedReader buffer = new BufferedReader(new FileReader("input.txt"));
                     for (int i = 0; i < 2; i++) {
@@ -763,29 +1018,29 @@ public class ZeyadAjamy {
                                 int x = Integer.parseInt(position[0]);
                                 int y = Integer.parseInt(position[1]);
                                 boolean check = true;
-                                if( j == 0){
+                                if (j == 0) {
                                     check = addJack(cells, x, y);
                                     jack = cells[x][y];
                                 }
-                                
-                                if (j == 1){
+
+                                if (j == 1) {
                                     check = flyingDutchman(cells, x, y);
                                 }
-                                
-                                if (j == 2){
+
+                                if (j == 2) {
                                     check = addKraken(cells, x, y);
                                 }
-                                
-                                if (j == 3){
+
+                                if (j == 3) {
                                     check = addRock(cells, x, y);
                                 }
-                                
-                                if (j == 4){
+
+                                if (j == 4) {
                                     check = addTreasure(cells, x, y);
                                     treasure = cells[x][y];
                                 }
-                                
-                                if (j == 5){
+
+                                if (j == 5) {
                                     check = addTortuga(cells, x, y);
                                     tortuga = cells[x][y];
                                 }
@@ -845,9 +1100,9 @@ public class ZeyadAjamy {
                     System.out.print("KR");
                 } else if (cells[i][j].content.equals("preKraken")) {
                     System.out.print("! ");
-                } else if (cells[i][j].content.equals("preDutchman")){
+                } else if (cells[i][j].content.equals("preDutchman")) {
                     System.out.print("! ");
-                } else if (cells[i][j].content.equals("kraken&preDutchman")){
+                } else if (cells[i][j].content.equals("kraken&preDutchman")) {
                     System.out.print("K!");
                 } else {
                     System.out.print("- ");
@@ -855,65 +1110,75 @@ public class ZeyadAjamy {
             }
             System.out.println();
         }
-        
+
         // Backtracking algorithm
         boolean jackHasRum = false;
         if ((tortuga == null && jack.status.equals("rum")) || (jack.x == tortuga.x && jack.y == tortuga.y)) {
             jackHasRum = true;
         }
         double startBackTTime = System.nanoTime();
-        
+
         Set<Cell> visited = new HashSet<Cell>();
-        visited.add(jack);
-        backtrack(makeMapCopy(cells), visited, treasure, jack, jackHasRum);
-        if (op.equals("")) {
-            Set<Cell> visited2 = new HashSet<Cell>();
-            visited2.add(jack);
-            backtrack(makeMapCopy(cells), visited2, tortuga, jack, jackHasRum);
-            String pathToTortuga = op;
-            if (pathToTortuga == "") {
-                // write to file that there is no path
+        Set<Cell> blocked = new HashSet<Cell>();
+        String directPath = backtrack(makeMapCopy(cells), visited, treasure, jack, blocked, jackHasRum);
+
+        String alternativePath = "";
+        Set<Cell> visited2 = new HashSet<Cell>();
+        String pathToTortuga = backtrack(makeMapCopy(cells), visited2, tortuga, jack, new HashSet<>(), jackHasRum);
+        if (pathToTortuga == null) {
+            // write to file that there is no path
+            printOutput("Lose", "outputBacktracking.txt");
+        } else {
+            pathToTortuga = pathToTortuga.trim();
+            Set<Cell> visited3 = new HashSet<Cell>();
+            visited3.add(tortuga);
+            visited3.add(jack);
+            String pathToTreasure = backtrack(makeMapCopy(cells), visited3, treasure, tortuga, new HashSet<>(), true);
+            if (pathToTreasure == null || pathToTreasure.trim().equals("")
+                    || pathToTreasure.trim().equals("[" + jack.x + "," + jack.y + "]")) {
                 printOutput("Lose", "outputBacktracking.txt");
             } else {
-                pathToTortuga = pathToTortuga.trim();
-                Set<Cell> visited3 = new HashSet<Cell>();
-                visited3.add(tortuga);
-                visited3.add(jack);
-                op = "";
-                backtrack(makeMapCopy(cells), visited3, treasure, tortuga, true);
-                String pathToTreasure = op;
-                if (pathToTreasure.trim().equals("") || pathToTreasure == null
-                        || pathToTreasure.trim().equals("[" + jack.x + "," + jack.y + "]")) {
-                    printOutput("Lose", "outputBacktracking.txt");
-                } else {
-                    ArrayList<String> temp = new ArrayList<>(Arrays.asList(pathToTreasure.split(" ")));
-                    temp.remove(0); // remove the first element
-                    pathToTreasure = String.join(" ", temp);
-                    op = pathToTortuga + " " + pathToTreasure;
-                }
+                ArrayList<String> temp = new ArrayList<>(Arrays.asList(pathToTreasure.split(" ")));
+                temp.remove(0); // remove the first element
+                pathToTreasure = String.join(" ", temp);
+                alternativePath = pathToTortuga + " " + pathToTreasure;
             }
         }
+
+        if (directPath == null && alternativePath.equals("")) {
+            directPath = null;
+        } else if (directPath == null && !alternativePath.equals("")) {
+            directPath = alternativePath;
+        } else if (!directPath.equals("") && alternativePath.equals("")) {
+            // no need to do anything
+        } else {
+            // compare the two paths and choose the shorter one
+            if (directPath.split(" ").length > alternativePath.split(" ").length) {
+                directPath = alternativePath;
+            }
+        }
+
         double endBackTTime = System.nanoTime();
         double d = (endBackTTime - startBackTTime) / 1000000;
 
         // Write the output to the file
-        if (op.equals("")) {
+        if (directPath == null || directPath.equals("")) {
             printOutput("Lose", "outputBacktracking.txt");
         } else {
             String output = "Win\n";
-            output += String.valueOf(op.split("]").length - 1) + "\n";
-            output += op + "\n";
+            output += String.valueOf(directPath.split("]").length - 1) + "\n";
+            output += directPath + "\n";
             // Write 2d map to the file
             output += "-------------------\n";
             output += "  0 1 2 3 4 5 6 7 8\n";
             // Convert the string path to 2d array
-            String[] pathArray = op.split(" ");
+            String[] pathArray = directPath.split(" ");
             String[][] path2dArray = new String[9][9];
             for (int i = 0; i < pathArray.length; i++) {
                 String[] coordinates = pathArray[i].split(",");
                 int x = Integer.parseInt(coordinates[0].substring(1));
                 int y = Integer.parseInt(coordinates[1].substring(0, 1));
-                if(path2dArray[x][y] != null && path2dArray[x][y].equals("*")){
+                if (path2dArray[x][y] != null && path2dArray[x][y].equals("*")) {
                     path2dArray[x][y] = "<>";
                 } else {
                     path2dArray[x][y] = "*";
@@ -952,15 +1217,16 @@ public class ZeyadAjamy {
         // Calculate time for the A* algorithm
 
         long startTime = System.nanoTime();
-        String path2 = aStar(makeMapCopy(cells), jack, treasure, jack.x, jack.y, open, closed, jackHasRum);
-        // If path is null then the treasure is not reachable mayber because of the kraken
+        String path2 = aStar(makeMapCopy(cells), jack, treasure, jack.x, jack.y, open, closed, jackHasRum, variant);
+        // If path is null then the treasure is not reachable mayber because of the
+        // kraken
         if (path2 == null) {
             // Find the shortest path to the Tortuga
             open = new HashSet<Cell>();
             closed = new HashSet<Cell>();
             closed.add(jack);
 
-            path2 = aStar(makeMapCopy(cells), jack, tortuga, jack.x, jack.y, open, closed, false);
+            path2 = aStar(makeMapCopy(cells), jack, tortuga, jack.x, jack.y, open, closed, false, variant);
             if (path2 == null) {
                 // Lost case
                 printOutput("Lose", "outputAStar.txt");
@@ -970,7 +1236,8 @@ public class ZeyadAjamy {
                 open = new HashSet<Cell>();
                 closed = new HashSet<Cell>();
                 closed.add(tortuga);
-                String pathFromTor = aStar(makeMapCopy(cells), tortuga, treasure, tortuga.x, tortuga.y, open, closed,true);
+                String pathFromTor = aStar(makeMapCopy(cells), tortuga, treasure, tortuga.x, tortuga.y, open, closed,
+                        true, variant);
                 if (pathFromTor == null) {
                     printOutput("Lose", "outputAStar.txt");
                     return;
@@ -984,19 +1251,20 @@ public class ZeyadAjamy {
 
             String path3 = "", path4 = "", path5 = "";
             path3 = path2;
-            
+
             open = new HashSet<Cell>();
             closed = new HashSet<Cell>();
             closed.add(jack);
-            path4 = aStar(makeMapCopy(cells), jack, tortuga, jack.x, jack.y, open, closed, false);
-            if(path4 != null) {
+            path4 = aStar(makeMapCopy(cells), jack, tortuga, jack.x, jack.y, open, closed, false, variant);
+            if (path4 != null) {
                 open = new HashSet<Cell>();
                 closed = new HashSet<Cell>();
                 closed.add(tortuga);
-                path5 = aStar(makeMapCopy(cells), tortuga, treasure, tortuga.x, tortuga.y, open, closed, true);
+                path5 = aStar(makeMapCopy(cells), tortuga, treasure, tortuga.x, tortuga.y, open, closed, true, variant);
             }
             if (path3 != null && path4 != null && path5 != null) {
-                String pathTotal2 = aStar(makeMapCopy(cells), tortuga, treasure, tortuga.x, tortuga.y, open, closed,true);
+                String pathTotal2 = aStar(makeMapCopy(cells), tortuga, treasure, tortuga.x, tortuga.y, open, closed,
+                        true, variant);
                 // compare the paths
                 if (pathTotal2 != null && pathTotal2.split(" ").length < path2.split(" ").length) {
                     path2 = pathTotal2;
@@ -1025,7 +1293,7 @@ public class ZeyadAjamy {
                         int x = Integer.parseInt(coordinates[0].substring(1));
                         int y = Integer.parseInt(coordinates[1].substring(0, 1));
                         if (i == x && j == y) {
-                            if(cells[i][j].content.equals("jack")){
+                            if (cells[i][j].content.equals("jack")) {
                                 cells[i][j].content = "<>";
                             } else {
                                 cells[i][j].content = "jack";
@@ -1044,7 +1312,7 @@ public class ZeyadAjamy {
                 for (int j = 0; j < 9; j++) {
                     if (cells[i][j].content.equals("jack")) {
                         output += "* ";
-                    } else if (cells[i][j].content.equals("<>")){
+                    } else if (cells[i][j].content.equals("<>")) {
                         output += "<>";
                     } else {
                         output += "- ";
