@@ -935,7 +935,7 @@ public class statistics {
                 Cell jack = new Cell(0, 0, "jack", "non");
                 Cell treasure = null;
                 Cell tortuga = null;
-                int variant = 0;
+                int variant = 2;
                 for (int h = 0; h < 9; h++) {
                     for (int j = 0; j < 9; j++) {
                         cells[h][j] = new Cell(h, j, "non", "empty");
@@ -1121,6 +1121,96 @@ public class statistics {
             return;
         }
 
-        System.out.println("Backtrack: " + winBack + " " + lostBack);
+        // Mean and standard deviation of the A* algorithm
+        double meanAstar = 0;
+        double varianceAstar = 0;
+        for (int i = 0; i < durationAstar.size(); i++) {
+            meanAstar += durationAstar.get(i);
+        }
+        meanAstar /= durationAstar.size();
+
+        for (int i = 0; i < durationAstar.size(); i++) {
+            varianceAstar += Math.pow(durationAstar.get(i) - meanAstar, 2);
+        }
+        varianceAstar /= durationAstar.size();
+        
+        double stdAstar = Math.sqrt(varianceAstar);
+
+        // Mean and standard deviation of the backtracking algorithm
+        double meanBack = 0;
+        double varianceBack = 0;
+        for (int i = 0; i < durationBacktrack.size(); i++) {
+            meanBack += durationBacktrack.get(i);
+        }
+
+        meanBack /= durationBacktrack.size();
+
+        for (int i = 0; i < durationBacktrack.size(); i++) {
+            varianceBack += Math.pow(durationBacktrack.get(i) - meanBack, 2);
+        }
+        varianceBack /= durationBacktrack.size();
+        double stdBack = Math.sqrt(varianceBack);
+
+        // Calculate the percentage of the wins
+        double winPercentageAstar = (double) winAstar / (winAstar + lostAstar) * 100;
+        double winPercentageBack = (double) winBack / (winBack + lostBack) * 100;
+
+        // Calculate the percentage of the lost
+        double lostPercentageAstar = (double) lostAstar / (winAstar + lostAstar) * 100;
+        double lostPercentageBack = (double) lostBack / (winBack + lostBack) * 100;
+
+        // Calculate the mode of the A* algorithm
+        double modeAstar = 0;
+        int maxCount = 0;
+        for (int i = 0; i < durationAstar.size(); i++) {
+            int count = 0;
+            for (int j = 0; j < durationAstar.size(); j++) {
+                if (durationAstar.get(j) == durationAstar.get(i)) {
+                    count++;
+                }
+            }
+            if (count > maxCount) {
+                maxCount = count;
+                modeAstar = durationAstar.get(i);
+            }
+        }
+
+        // Calculate the mode of the backtracking algorithm
+        double modeBack = 0;
+        maxCount = 0;
+        for (int i = 0; i < durationBacktrack.size(); i++) {
+            int count = 0;
+            for (int j = 0; j < durationBacktrack.size(); j++) {
+                if (durationBacktrack.get(j) == durationBacktrack.get(i)) {
+                    count++;
+                }
+            }
+            if (count > maxCount) {
+                maxCount = count;
+                modeBack = durationBacktrack.get(i);
+            }
+        }
+
+        // write the results to the file
+        try {
+            FileWriter fw = new FileWriter("resultsA2B2.txt");
+            String output = "A* algorithm Variant 2: \n";
+            output += "Mean: " + meanAstar + "\n";
+            output += "Standard deviation: " + stdAstar + "\n";
+            output += "Mode: " + modeAstar + "\n";
+            output += "Win percentage: " + winPercentageAstar + "\n";
+            output += "Lost percentage: " + lostPercentageAstar + "\n";
+            output += "Backtracking algorithm: \n";
+            output += "Mean: " + meanBack + "\n";
+            output += "Standard deviation: " + stdBack + "\n";
+            output += "Mode: " + modeBack + "\n";
+            output += "Win percentage: " + winPercentageBack + "\n";
+            output += "Lost percentage: " + lostPercentageBack + "\n";
+            fw.write(output);
+            fw.close();
+        } catch (IOException e) {
+            System.out.println("Invalid input: Please enter valid input!");
+            return;
+        }
     }
 }

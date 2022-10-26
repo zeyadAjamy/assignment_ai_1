@@ -1,0 +1,13 @@
+A* algorithm Variant 1: 
+Mean: 1.772
+Standard deviation: 2.9380292714675087
+Mode: 11.0
+Win percentage: 91.8
+Lost percentage: 8.200000000000001
+
+Backtracking algorithm: 
+Mean: 0.3675857250000001
+Standard deviation: 0.5798717631374978
+Mode: 3.344773
+Win percentage: 91.8
+Lost percentage: 8.200000000000001
