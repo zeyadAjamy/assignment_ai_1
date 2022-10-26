@@ -113,6 +113,7 @@ class Cell {
  * @since 2022-10-26
  */
 public class ZeyadAjamy {
+
     /**
      * Determines whether the given cell coordinates are in the given list of cells.
      *
@@ -121,7 +122,6 @@ public class ZeyadAjamy {
      * @param y      y coordinate of the cell of type int.
      * @return true if the given cell coordinates are in the given list of cells.
      */
-
     public static Boolean existInSet(Cell[] closed, int x, int y) {
         for (Cell cell : closed) {
             if (cell != null && cell.x == x && cell.y == y) {
@@ -138,7 +138,6 @@ public class ZeyadAjamy {
      * @param kraken The kraken cell of type Cell.
      * @return The graph after killing the kraken.
      */
-
     public static Cell[][] handlekraken(Cell[][] map, Cell kraken) {
         int x = kraken.x;
         int y = kraken.y;
@@ -332,7 +331,6 @@ public class ZeyadAjamy {
      * @param y            The y coordinate of the cell of type int.
      * @return True if the cell exists in the closed set, false otherwise.
      */
-
     public static Cell getCellFromSet(ArrayList<Cell> searchingSet, int x, int y) {
         for (Cell c : searchingSet) {
             if (c.x == x && c.y == y) {
@@ -351,7 +349,6 @@ public class ZeyadAjamy {
      * @param treasure The treasure cell of type Cell.
      * @return The huristic value of the cell.
      */
-
     public static int calculateHeuristic(Cell[][] map, int x, int y, Cell treasure) {
         int xTreasure = treasure.x;
         int yTreasure = treasure.y;
@@ -723,7 +720,6 @@ public class ZeyadAjamy {
      * @return true if the Dutchman is allowed to be added according to the task,
      *         false otherwise.
      */
-
     public static boolean flyingDutchman(Cell[][] map, int x, int y) {
         if (x < 0 || x > 8 || y < 0 || y > 8)
             return false;
@@ -862,7 +858,6 @@ public class ZeyadAjamy {
      * @return the generated map
      * @returnType type Cell[][]
      */
-
     public static Cell[][] genrateRandomMap(Cell[][] cells, Cell jack, Cell treasure, Cell tortuga) {
         cells[0][0].content = "jack";
         addJack(cells, 0, 0);
