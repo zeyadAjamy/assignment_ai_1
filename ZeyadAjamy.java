@@ -183,8 +183,10 @@ public class ZeyadAjamy {
      * @param closed     The list of visited cells of type Set<Cell>.
      * @param target     The end cell of type Cell.
      * @param current    The current cell of type Cell.
-     * @param block_list The list of cells that cannot be moved to of type Set<Cell>.
-     * @param rum        boolean value that determines whether jack has rum or not of type boolean.
+     * @param block_list The list of cells that cannot be moved to of type
+     *                   Set<Cell>.
+     * @param rum        boolean value that determines whether jack has rum or not
+     *                   of type boolean.
      * @return The path from the start to the end cell or null if there is no path.
      */
     public static String backtrack(Cell[][] map, Set<Cell> closed, Cell target, Cell current, Set<Cell> block_list,
@@ -342,9 +344,10 @@ public class ZeyadAjamy {
 
     /**
      * Calculates the cell huristic value.
-     * @param map The map of the game.
-     * @param x The x coordinate of the cell of type int.
-     * @param y The y coordinate of the cell of type int.
+     * 
+     * @param map      The map of the game.
+     * @param x        The x coordinate of the cell of type int.
+     * @param y        The y coordinate of the cell of type int.
      * @param treasure The treasure cell of type Cell.
      * @return The huristic value of the cell.
      */
@@ -359,16 +362,18 @@ public class ZeyadAjamy {
     }
 
     /**
-     * Applies the A* algorithm to the given map. to find the optimal path to the given target.
-     * @param map The map of the game of type Cell[][].
-     * @param jack The jack cell of type Cell.
+     * Applies the A* algorithm to the given map. to find the optimal path to the
+     * given target.
+     * 
+     * @param map      The map of the game of type Cell[][].
+     * @param jack     The jack cell of type Cell.
      * @param treasure The treasure cell of type Cell.
-     * @param x The x coordinate of the cell of type int.
-     * @param y The y coordinate of the cell of type int.
-     * @param open The open set of type Set<Cell>.
-     * @param closed The closed set of type Set<Cell>.
-     * @param rum The rum flag of type boolean.
-     * @param variant The variant of the algorithm of type int.
+     * @param x        The x coordinate of the cell of type int.
+     * @param y        The y coordinate of the cell of type int.
+     * @param open     The open set of type Set<Cell>.
+     * @param closed   The closed set of type Set<Cell>.
+     * @param rum      The rum flag of type boolean.
+     * @param variant  The variant of the algorithm of type int.
      * @return The optimal path to the target, or null if no path is found.
      */
     public static String aStar(Cell[][] map, Cell jack, Cell treasure, int x, int y, Set<Cell> open, Set<Cell> closed,
@@ -403,7 +408,8 @@ public class ZeyadAjamy {
                             map[i][j].parent = map[x][y];
                         }
 
-                        if (!existInSet(openSet.toArray(array2), i, j) && (content.equals("non") || content.equals("treasure"))) {
+                        if (!existInSet(openSet.toArray(array2), i, j)
+                                && (content.equals("non") || content.equals("treasure"))) {
                             open.add(map[i][j]);
                         } else if (content.equals("tortuga")) {
                             open.add(map[i][j]);
@@ -637,7 +643,8 @@ public class ZeyadAjamy {
 
     /**
      * Prints out a string to specific file
-     * @param output the string to be printed out. Type String
+     * 
+     * @param output   the string to be printed out. Type String
      * @param fileName the name of the file. Type String.
      * @throws IOException
      */
@@ -650,10 +657,12 @@ public class ZeyadAjamy {
 
     /**
      * Add the kraken to the map and it's preceptions zone.
+     * 
      * @param map the map. Type Cell[][]
-     * @param x the x coordinate of the cell to be added. Type int
-     * @param y the y coordinate of the cell to be added. Type int
-     * @return true if the kraken is allowed to be added according to the task, false otherwise.
+     * @param x   the x coordinate of the cell to be added. Type int
+     * @param y   the y coordinate of the cell to be added. Type int
+     * @return true if the kraken is allowed to be added according to the task,
+     *         false otherwise.
      */
     public static boolean addKraken(Cell[][] map, int x, int y) {
         if (x < 0 || x > 8 || y < 0 || y > 8)
@@ -707,10 +716,12 @@ public class ZeyadAjamy {
 
     /**
      * Add the Dutchman to the map and it's preceptions zone.
+     * 
      * @param map the map to be added. Type Cell[][]
-     * @param x the x coordinate of the cell to be added. Type int
-     * @param y the y coordinate of the cell to be added. Type int
-     * @return true if the Dutchman is allowed to be added according to the task, false otherwise.
+     * @param x   the x coordinate of the cell to be added. Type int
+     * @param y   the y coordinate of the cell to be added. Type int
+     * @return true if the Dutchman is allowed to be added according to the task,
+     *         false otherwise.
      */
 
     public static boolean flyingDutchman(Cell[][] map, int x, int y) {
@@ -737,10 +748,12 @@ public class ZeyadAjamy {
 
     /**
      * Add the rock to the map.
-     * @param map the map  to be added. Type Cell[][]
-     * @param x the x coordinate of the cell to be added. Type int
-     * @param y the y coordinate of the cell to be added. Type int
-     * @return true if the rock is allowed to be added according to the task, false otherwise.
+     * 
+     * @param map the map to be added. Type Cell[][]
+     * @param x   the x coordinate of the cell to be added. Type int
+     * @param y   the y coordinate of the cell to be added. Type int
+     * @return true if the rock is allowed to be added according to the task, false
+     *         otherwise.
      */
     public static boolean addRock(Cell[][] map, int x, int y) {
         if (x < 0 || x > 8 || y < 0 || y > 8)
@@ -762,10 +775,12 @@ public class ZeyadAjamy {
 
     /**
      * Add the tortuga to the map.
+     * 
      * @param map the map to be added. Type Cell[][]
-     * @param x the x coordinate of the cell to be added. Type int
-     * @param y the y coordinate of the cell to be added. Type int
-     * @return true if the tortuga is allowed to be added according to the task, false otherwise.
+     * @param x   the x coordinate of the cell to be added. Type int
+     * @param y   the y coordinate of the cell to be added. Type int
+     * @return true if the tortuga is allowed to be added according to the task,
+     *         false otherwise.
      */
     public static boolean addTortuga(Cell[][] map, int x, int y) {
         if (x < 0 || x > 8 || y < 0 || y > 8)
@@ -783,10 +798,12 @@ public class ZeyadAjamy {
 
     /**
      * Add the tresure cell to the map.
+     * 
      * @param map the map to be added. Type Cell[][]
-     * @param x the x coordinate of the cell to be added. Type int
-     * @param y the y coordinate of the cell to be added. Type int
-     * @return true if the tresure is allowed to be added according to the task, false otherwise.
+     * @param x   the x coordinate of the cell to be added. Type int
+     * @param y   the y coordinate of the cell to be added. Type int
+     * @return true if the tresure is allowed to be added according to the task,
+     *         false otherwise.
      */
     public static boolean addTreasure(Cell[][] map, int x, int y) {
         if (x < 0 || x > 8 || y < 0 || y > 8)
@@ -802,10 +819,12 @@ public class ZeyadAjamy {
 
     /**
      * Add the jack to the map.
+     * 
      * @param map the map to be added. Type Cell[][]
-     * @param x the x coordinate of the cell to be added. Type int
-     * @param y the y coordinate of the cell to be added. Type int
-     * @return true if the jack is allowed to be added according to the task, false otherwise.
+     * @param x   the x coordinate of the cell to be added. Type int
+     * @param y   the y coordinate of the cell to be added. Type int
+     * @return true if the jack is allowed to be added according to the task, false
+     *         otherwise.
      */
     public static boolean addJack(Cell[][] map, int x, int y) {
         if (x != 0 && y != 0) {
@@ -819,6 +838,7 @@ public class ZeyadAjamy {
 
     /**
      * Makes a copy of the map. To avoid changing the original map.
+     * 
      * @param map the map to be copied. Type Cell[][]
      * @return the copy of the map
      */
@@ -832,9 +852,91 @@ public class ZeyadAjamy {
         return copy;
     }
 
+    /**
+     * Generates a random valid map.
+     * 
+     * @param cells    map to be generated on. Type Cell[][]
+     * @param jack     the jack cell. Type Cell
+     * @param treasure the treasure cell. Type Cell
+     * @param tortuga  the tortuga cell. Type Cell
+     * @return the generated map
+     * @returnType type Cell[][]
+     */
+
+    public static Cell[][] genrateRandomMap(Cell[][] cells, Cell jack, Cell treasure, Cell tortuga) {
+        cells[0][0].content = "jack";
+        addJack(cells, 0, 0);
+        jack = cells[0][0];
+        // Add tortuga to the map
+        // Rand number between 1 and 7
+        int to_x = (int) (Math.random() * 7) + 1;
+        int to_y = (int) (Math.random() * 7) + 1;
+
+        addTortuga(cells, to_x, to_y);
+        tortuga = cells[to_x][to_y];
+        // Add treasure to the map
+        // Rand number between 1 and 7 and not equal to tortuga
+        int tr_x = (int) (Math.random() * 7) + 1;
+        int tr_y = (int) (Math.random() * 7) + 1;
+        while (tr_x == to_x && tr_y == to_y) {
+            tr_x = (int) (Math.random() * 7) + 1;
+            tr_y = (int) (Math.random() * 7) + 1;
+        }
+        addTreasure(cells, tr_x, tr_y);
+        treasure = cells[tr_x][tr_y];
+        // Add kraken to the map
+        // Rand number between 1 and 7 and atleast 1 cells away from tortuga, treasure,
+        // jack
+        int kr_x = (int) (Math.random() * 7) + 3;
+        int kr_y = (int) (Math.random() * 7) + 3;
+        while (!addKraken(cells, kr_x, kr_y)) {
+            kr_x = (int) (Math.random() * 7) + 3;
+            kr_y = (int) (Math.random() * 7) + 3;
+        }
+
+        // Add the rocks to the map
+        // Rand number between 1 and 7 and atleast 1 cells away from tortuga, treasure,
+        // jack
+        int ro_x = (int) (Math.random() * 7) + 1;
+        int ro_y = (int) (Math.random() * 7) + 1;
+        while (!addRock(cells, ro_x, ro_y)) {
+            ro_x = (int) (Math.random() * 7) + 1;
+            ro_y = (int) (Math.random() * 7) + 1;
+        }
+
+        // Add the Flying Dutchman to the map
+        // Rand number between 3 and 7 and atleast 2 cells away from tortuga, treasure,
+        // jack
+        int fd_x = (int) (Math.random() * 7) + 3;
+        int fd_y = (int) (Math.random() * 7) + 3;
+        while (!flyingDutchman(cells, fd_x, fd_y)) {
+            fd_x = (int) (Math.random() * 7) + 3;
+            fd_y = (int) (Math.random() * 7) + 3;
+        }
+
+        return cells;
+    }
+
+    /**
+     * Takes the input from the user in one of 3 variants.
+     * Variant 1: random map
+     * Variant 2: map from user console
+     * Variant 3: map from file
+     * Then it calls the methods to construct the map. After that, it
+     * calls backtracking method to find the path which is not guranateed to be the
+     * shortest.
+     * Then it calls the method to find the shortest path
+     * 
+     * @param args
+     * @throws IOException in case of any file reading or writing errors
+     */
     public static void main(String[] args) throws IOException {
+
+        // Construct empty 9*9 map
         Cell[][] cells = new Cell[9][9];
-        Cell jack = null, treasure = null, tortuga = null;
+        Cell jack = new Cell(0, 0, "jack", "non");
+        Cell treasure = null;
+        Cell tortuga = null;
         int variant = 0;
         for (int i = 0; i < 9; i++) {
             for (int j = 0; j < 9; j++) {
@@ -842,9 +944,8 @@ public class ZeyadAjamy {
             }
         }
 
-        try (// Ask the user if he/ she wants to generate a random map or input one or read
-             // from input.txt
-                Scanner scanner = new Scanner(System.in)) {
+        // Take the input from the user
+        try (Scanner scanner = new Scanner(System.in)) {
             System.out.println("Please enter the number of the variant you want to run:");
             System.out.println("1. Random map");
             System.out.println("2. Input map and preception' senario");
@@ -854,61 +955,24 @@ public class ZeyadAjamy {
                 System.out.println("Invalid input");
                 return;
             }
+            // Variant 1: random map
             if (userVariant == 1) {
                 // Add jack to the map
                 // rand is the random number between 1 and 2
                 variant = (int) (Math.random() * 2) + 1;
-                cells[0][0].content = "jack";
-                addJack(cells, 0, 0);
-                jack = cells[0][0];
-                // Add tortuga to the map
-                // Rand number between 1 and 7
-                int to_x = (int) (Math.random() * 7) + 1;
-                int to_y = (int) (Math.random() * 7) + 1;
-
-                addTortuga(cells, to_x, to_y);
-                tortuga = cells[to_x][to_y];
-                // Add treasure to the map
-                // Rand number between 1 and 7 and not equal to tortuga
-                int tr_x = (int) (Math.random() * 7) + 1;
-                int tr_y = (int) (Math.random() * 7) + 1;
-                while (tr_x == to_x && tr_y == to_y) {
-                    tr_x = (int) (Math.random() * 7) + 1;
-                    tr_y = (int) (Math.random() * 7) + 1;
-                }
-                addTreasure(cells, tr_x, tr_y);
-                treasure = cells[tr_x][tr_y];
-                // Add kraken to the map
-                // Rand number between 1 and 7 and atleast 1 cells away from tortuga, treasure,
-                // jack
-                int kr_x = (int) (Math.random() * 7) + 3;
-                int kr_y = (int) (Math.random() * 7) + 3;
-                while (!addKraken(cells, kr_x, kr_y)) {
-                    kr_x = (int) (Math.random() * 7) + 3;
-                    kr_y = (int) (Math.random() * 7) + 3;
-                }
-
-                // Add the rocks to the map
-                // Rand number between 1 and 7 and atleast 1 cells away from tortuga, treasure,
-                // jack
-                int ro_x = (int) (Math.random() * 7) + 1;
-                int ro_y = (int) (Math.random() * 7) + 1;
-                while (!addRock(cells, ro_x, ro_y)) {
-                    ro_x = (int) (Math.random() * 7) + 1;
-                    ro_y = (int) (Math.random() * 7) + 1;
-                }
-
-                // Add the Flying Dutchman to the map
-                // Rand number between 3 and 7 and atleast 2 cells away from tortuga, treasure,
-                // jack
-                int fd_x = (int) (Math.random() * 7) + 3;
-                int fd_y = (int) (Math.random() * 7) + 3;
-                while (!flyingDutchman(cells, fd_x, fd_y)) {
-                    fd_x = (int) (Math.random() * 7) + 3;
-                    fd_y = (int) (Math.random() * 7) + 3;
+                cells = genrateRandomMap(cells, jack, treasure, tortuga);
+                // find the treasure cell
+                for (int i = 0; i < 9; i++) {
+                    for (int j = 0; j < 9; j++) {
+                        if (cells[i][j].content.equals("treasure")) {
+                            treasure = cells[i][j];
+                        } else if (cells[i][j].content.equals("tortuga")) {
+                            tortuga = cells[i][j];
+                        }
+                    }
                 }
             }
-
+            // Varient 2: get the user input from the console
             if (userVariant == 2) {
                 // Read the input from the user and add the map to the cells
                 // Scanner userInput = new Scanner(System.in);
@@ -992,7 +1056,7 @@ public class ZeyadAjamy {
                     return;
                 }
             }
-
+            // Varient 3: get the user input from the file
             if (userVariant == 3) {
                 try {
                     BufferedReader buffer = new BufferedReader(new FileReader("input.txt"));
@@ -1077,67 +1141,29 @@ public class ZeyadAjamy {
         } catch (NumberFormatException e) {
             e.printStackTrace();
         }
-        // Print the initial state
-        System.out.println("2D map:");
-        System.out.println("-------------------");
-        System.out.println("  0 1 2 3 4 5 6 7 8");
-        for (int i = 0; i < 9; i++) {
-            System.out.print(i + " ");
-            for (int j = 0; j < 9; j++) {
-                if (cells[j][i].content.equals("jack")) {
-                    System.out.print("J ");
-                } else if (cells[i][j].content.equals("dutchman")) {
-                    System.out.print("D ");
-                } else if (cells[i][j].content.equals("kraken")) {
-                    System.out.print("K ");
-                } else if (cells[i][j].content.equals("rock")) {
-                    System.out.print("R ");
-                } else if (cells[i][j].content.equals("treasure")) {
-                    System.out.print("T ");
-                } else if (cells[i][j].content.equals("tortuga")) {
-                    System.out.print("O ");
-                } else if (cells[i][j].content.equals("kraken&rock")) {
-                    System.out.print("KR");
-                } else if (cells[i][j].content.equals("preKraken")) {
-                    System.out.print("! ");
-                } else if (cells[i][j].content.equals("preDutchman")) {
-                    System.out.print("! ");
-                } else if (cells[i][j].content.equals("kraken&preDutchman")) {
-                    System.out.print("K!");
-                } else {
-                    System.out.print("- ");
-                }
-            }
-            System.out.println();
-        }
 
-        // Backtracking algorithm
+        // Check if jack is in the same cell as the treasure
         boolean jackHasRum = false;
         if ((tortuga == null && jack.status.equals("rum")) || (jack.x == tortuga.x && jack.y == tortuga.y)) {
             jackHasRum = true;
         }
-        double startBackTTime = System.nanoTime();
 
+        // Backtracking call
+        double startBackTTime = System.nanoTime();
         Set<Cell> visited = new HashSet<Cell>();
         Set<Cell> blocked = new HashSet<Cell>();
+        // the direct path from the jack to the treasure without forcing the jack to go
+        // through the tortuga
         String directPath = backtrack(makeMapCopy(cells), visited, treasure, jack, blocked, jackHasRum);
 
         String alternativePath = "";
-        Set<Cell> visited2 = new HashSet<Cell>();
-        String pathToTortuga = backtrack(makeMapCopy(cells), visited2, tortuga, jack, new HashSet<>(), jackHasRum);
-        if (pathToTortuga == null) {
-            // write to file that there is no path
-            printOutput("Lose", "outputBacktracking.txt");
-        } else {
+        String pathToTortuga = backtrack(makeMapCopy(cells), new HashSet<Cell>(), tortuga, jack, new HashSet<>(),
+                jackHasRum);
+        if (pathToTortuga != null) { // if the jack can't reach the tortuga
             pathToTortuga = pathToTortuga.trim();
-            Set<Cell> visited3 = new HashSet<Cell>();
-            visited3.add(tortuga);
-            visited3.add(jack);
-            String pathToTreasure = backtrack(makeMapCopy(cells), visited3, treasure, tortuga, new HashSet<>(), true);
-            if (pathToTreasure == null || pathToTreasure.trim().equals("")
-                    || pathToTreasure.trim().equals("[" + jack.x + "," + jack.y + "]")) {
-                printOutput("Lose", "outputBacktracking.txt");
-            } else {
+            String pathToTreasure = backtrack(makeMapCopy(cells), new HashSet<Cell>(), treasure, tortuga,
+                    new HashSet<>(), true);
+            if (pathToTreasure != null) {
                 ArrayList<String> temp = new ArrayList<>(Arrays.asList(pathToTreasure.split(" ")));
                 temp.remove(0); // remove the first element
                 pathToTreasure = String.join(" ", temp);
@@ -1161,7 +1187,7 @@ public class ZeyadAjamy {
         double endBackTTime = System.nanoTime();
         double d = (endBackTTime - startBackTTime) / 1000000;
 
-        // Write the output to the file
+        // Write the output of the backtracking algorithm to the file
         if (directPath == null || directPath.equals("")) {
             printOutput("Lose", "outputBacktracking.txt");
         } else {
@@ -1217,78 +1243,57 @@ public class ZeyadAjamy {
         // Calculate time for the A* algorithm
 
         long startTime = System.nanoTime();
-        String path2 = aStar(makeMapCopy(cells), jack, treasure, jack.x, jack.y, open, closed, jackHasRum, variant);
+        String directPathAStart = aStar(makeMapCopy(cells), jack, treasure, jack.x, jack.y, open, closed, jackHasRum,
+                variant);
         // If path is null then the treasure is not reachable mayber because of the
-        // kraken
-        if (path2 == null) {
-            // Find the shortest path to the Tortuga
-            open = new HashSet<Cell>();
-            closed = new HashSet<Cell>();
-            closed.add(jack);
+        String alternativePathAStart = "";
+        open = new HashSet<Cell>();
+        closed = new HashSet<Cell>();
+        closed.add(jack);
 
-            path2 = aStar(makeMapCopy(cells), jack, tortuga, jack.x, jack.y, open, closed, false, variant);
-            if (path2 == null) {
-                // Lost case
-                printOutput("Lose", "outputAStar.txt");
-                return;
-            } else {
-                // Find shortest path to the treasure from the Tortuga
-                open = new HashSet<Cell>();
-                closed = new HashSet<Cell>();
-                closed.add(tortuga);
-                String pathFromTor = aStar(makeMapCopy(cells), tortuga, treasure, tortuga.x, tortuga.y, open, closed,
-                        true, variant);
-                if (pathFromTor == null) {
-                    printOutput("Lose", "outputAStar.txt");
-                    return;
-                }
-                path2 += " " + pathFromTor.trim();
-            }
-        } else {
+        String pathToToutugaAStar = aStar(makeMapCopy(cells), jack, tortuga, jack.x, jack.y, open, closed, false,
+                variant);
+        if (pathToToutugaAStar != null) {
+            // Find shortest path to the treasure from the Tortuga
             open = new HashSet<Cell>();
             closed = new HashSet<Cell>();
             closed.add(tortuga);
-
-            String path3 = "", path4 = "", path5 = "";
-            path3 = path2;
-
-            open = new HashSet<Cell>();
-            closed = new HashSet<Cell>();
-            closed.add(jack);
-            path4 = aStar(makeMapCopy(cells), jack, tortuga, jack.x, jack.y, open, closed, false, variant);
-            if (path4 != null) {
-                open = new HashSet<Cell>();
-                closed = new HashSet<Cell>();
-                closed.add(tortuga);
-                path5 = aStar(makeMapCopy(cells), tortuga, treasure, tortuga.x, tortuga.y, open, closed, true, variant);
-            }
-            if (path3 != null && path4 != null && path5 != null) {
-                String pathTotal2 = aStar(makeMapCopy(cells), tortuga, treasure, tortuga.x, tortuga.y, open, closed,
-                        true, variant);
-                // compare the paths
-                if (pathTotal2 != null && pathTotal2.split(" ").length < path2.split(" ").length) {
-                    path2 = pathTotal2;
-
-                }
+            String pathFromTor = aStar(makeMapCopy(cells), tortuga, treasure, tortuga.x, tortuga.y, open, closed,
+                    true, variant);
+            if (pathFromTor != null) {
+                alternativePathAStart = pathToToutugaAStar.trim() + " " + pathFromTor.trim();
             }
         }
+
         // Compare the two paths
+        if (directPathAStart == null && alternativePathAStart.equals("")) {
+            directPathAStart = null;
+        } else if (directPathAStart == null && !alternativePathAStart.equals("")) {
+            directPathAStart = alternativePathAStart;
+        } else if (!directPathAStart.equals("") && alternativePathAStart.equals("")) {
+            // no need to do anything
+        } else {
+            // compare the two paths and choose the shorter one
+            if (directPathAStart.split(" ").length > alternativePathAStart.split(" ").length) {
+                directPathAStart = alternativePathAStart;
+            }
+        }
         long endTime = System.nanoTime();
 
         long duration = (endTime - startTime) / 1000000;
         // Write the output to the file
-        if (path2.trim().equals("")) {
+        if (directPathAStart == null || directPathAStart.trim().equals("")) {
             printOutput("Lose", "outputAStar.txt");
         } else {
             String output = "Win\n";
-            output += String.valueOf(path2.split(" ").length) + "\n";
-            output += "[" + jack.x + "," + jack.y + "] " + path2 + "\n";
+            output += String.valueOf(directPathAStart.split(" ").length) + "\n";
+            output += "[" + jack.x + "," + jack.y + "] " + directPathAStart + "\n";
 
             // Convert the string path of [0-8] [0-8] to 2d map
-            String[] winningPathArray = path2.split(" ");
+            String[] winningPathArray = directPathAStart.split(" ");
             for (int i = 0; i < 9; i++) {
                 for (int j = 0; j < 9; j++) {
-                    for (int k = 0; k < path2.split(" ").length; k++) {
+                    for (int k = 0; k < directPathAStart.split(" ").length; k++) {
                         String[] coordinates = winningPathArray[k].split(",");
                         int x = Integer.parseInt(coordinates[0].substring(1));
                         int y = Integer.parseInt(coordinates[1].substring(0, 1));
