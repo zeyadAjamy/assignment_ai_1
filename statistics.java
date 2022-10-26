@@ -112,16 +112,8 @@ class Cell {
  * @version 1.0
  * @since 2022-10-26
  */
-public class ZeyadAjamy {
+public class statistics {
 
-    /**
-     * Determines whether the given cell coordinates are in the given list of cells.
-     *
-     * @param closed The list of cells of type Cell[]
-     * @param x      x coordinate of the cell of type int.
-     * @param y      y coordinate of the cell of type int.
-     * @return true if the given cell coordinates are in the given list of cells.
-     */
     public static Boolean existInSet(Cell[] closed, int x, int y) {
         for (Cell cell : closed) {
             if (cell != null && cell.x == x && cell.y == y) {
@@ -927,409 +919,208 @@ public class ZeyadAjamy {
      * @throws IOException in case of any file reading or writing errors
      */
     public static void main(String[] args) throws IOException {
-
-        // Construct empty 9*9 map
-        Cell[][] cells = new Cell[9][9];
-        Cell jack = new Cell(0, 0, "jack", "non");
-        Cell treasure = null;
-        Cell tortuga = null;
-        int variant = 0;
-        for (int i = 0; i < 9; i++) {
-            for (int j = 0; j < 9; j++) {
-                cells[i][j] = new Cell(i, j, "non", "empty");
-            }
-        }
-
         // Take the input from the user
-        try (Scanner scanner = new Scanner(System.in)) {
-            System.out.println("Please enter the number of the variant you want to run:");
-            System.out.println("1. Random map");
-            System.out.println("2. Input map and preception' senario");
-            System.out.println("3. Read from input.txt");
-            int userVariant = scanner.nextInt();
-            if (userVariant < 1 || userVariant > 3) {
-                System.out.println("Invalid input");
-                return;
-            }
-            // Variant 1: random map
-            if (userVariant == 1) {
-                // Add jack to the map
-                // rand is the random number between 1 and 2
-                variant = (int) (Math.random() * 2) + 1;
-                cells = genrateRandomMap(cells, jack, treasure, tortuga);
-                // find the treasure cell
-                for (int i = 0; i < 9; i++) {
+        ArrayList<Double> durationAstar = new ArrayList<>();
+        ArrayList<Double> durationBacktrack = new ArrayList<>();
+        int winAstar = 0;
+        int winBack = 0;
+        int lostAstar = 0;
+        int lostBack = 0;
+        try {
+            BufferedReader buffer = new BufferedReader(new FileReader("maps.txt"));
+            for (int i = 0; i < 1000; i++) {
+
+                // Construct empty 9*9 map
+                Cell[][] cells = new Cell[9][9];
+                Cell jack = new Cell(0, 0, "jack", "non");
+                Cell treasure = null;
+                Cell tortuga = null;
+                int variant = 0;
+                for (int h = 0; h < 9; h++) {
                     for (int j = 0; j < 9; j++) {
-                        if (cells[i][j].content.equals("treasure")) {
-                            treasure = cells[i][j];
-                        } else if (cells[i][j].content.equals("tortuga")) {
-                            tortuga = cells[i][j];
-                        }
+                        cells[h][j] = new Cell(h, j, "non", "empty");
                     }
                 }
-            }
-            // Varient 2: get the user input from the console
-            if (userVariant == 2) {
-                // Read the input from the user and add the map to the cells
-                // Scanner userInput = new Scanner(System.in);
-                System.out.println("Please enter the map in one line:");
-                // Read the input from the user console
-                try {
-                    // read the line with spaces
-                    String line1 = scanner.nextLine();
-                    line1 = scanner.nextLine();
-                    String[] map = line1.split(" ");
-                    // Add the map to the cells
-                    if (map.length > 6 || map.length < 6) {
-                        System.out.println("Invalid input: Please enter 6 postions!");
-                        return;
-                    }
-                    for (int j = 0; j < 6; j++) {
-                        String point = map[j].trim();
-                        // remove the first and last characters
-                        point = point.substring(1, point.length() - 1);
 
-                        // Validate the input
-                        if (!point.matches("[0-8],[0-8]")) {
-                            System.out.println("Invalid input: Please enter valid positions!");
-                            return;
-                        }
-
-                        String[] position = point.split(",");
-                        int x = Integer.parseInt(position[0]);
-                        int y = Integer.parseInt(position[1]);
-                        boolean check = true;
-                        if (j == 0) {
-                            check = addJack(cells, x, y);
-                            jack = cells[x][y];
-                        }
-
-                        if (j == 1) {
-                            check = flyingDutchman(cells, x, y);
-                        }
-
-                        if (j == 2) {
-                            check = addKraken(cells, x, y);
-                        }
-
-                        if (j == 3) {
-                            check = addRock(cells, x, y);
-                        }
-
-                        if (j == 4) {
-                            check = addTreasure(cells, x, y);
-                            treasure = cells[x][y];
-                        }
-
-                        if (j == 5) {
-                            check = addTortuga(cells, x, y);
-                            tortuga = cells[x][y];
-                        }
-                        if (!check) {
-                            System.out.println("Invalid input: Please enter valid positions!");
-                            return;
-                        }
-                    }
-
-                    // Read the second line
-                    System.out.println("Please enter the senario in one line:");
-                    line1 = scanner.nextLine();
-
-                    try {
-                        int senario = Integer.parseInt(String.valueOf(line1.trim()));
-                        // Add the senario to the cells
-                        if (senario < 1 || senario > 2) {
-                            System.out.println("Invalid input: Please enter 6 postions!");
-                            return;
-                        }
-                        variant = senario;
-                    } catch (NumberFormatException e) {
-                        System.out.println("Invalid input: Please enter a number!");
-                        return;
-                    }
-                } catch (Exception e) {
-                    System.out.println("Invalid input: Please enter a number!");
+                String[] input = buffer.readLine().split(" ");
+                if (input.length > 6 || input.length < 6) {
+                    System.out.println("Invalid input: Please enter 6 postions!");
                     return;
                 }
-            }
-            // Varient 3: get the user input from the file
-            if (userVariant == 3) {
-                try {
-                    BufferedReader buffer = new BufferedReader(new FileReader("input.txt"));
-                    for (int i = 0; i < 2; i++) {
-                        if (i == 0) {
-                            String[] input = buffer.readLine().split(" ");
-                            if (input.length > 6 || input.length < 6) {
-                                System.out.println("Invalid input: Please enter 6 postions!");
-                                return;
-                            }
-                            for (int j = 0; j < 6; j++) {
-                                String point = input[j].trim();
-                                // remove the first and last characters
-                                point = point.substring(1, point.length() - 1);
+                for (int j = 0; j < 6; j++) {
+                    String point = input[j].trim();
+                    // remove the first and last characters
+                    point = point.substring(1, point.length() - 1);
 
-                                // Validate the input
-                                if (!point.matches("[0-8],[0-8]")) {
-                                    System.out.println("Invalid input: Please enter valid positions!");
-                                    return;
-                                }
-
-                                String[] position = point.split(",");
-                                int x = Integer.parseInt(position[0]);
-                                int y = Integer.parseInt(position[1]);
-                                boolean check = true;
-                                if (j == 0) {
-                                    check = addJack(cells, x, y);
-                                    jack = cells[x][y];
-                                }
-
-                                if (j == 1) {
-                                    check = flyingDutchman(cells, x, y);
-                                }
-
-                                if (j == 2) {
-                                    check = addKraken(cells, x, y);
-                                }
-
-                                if (j == 3) {
-                                    check = addRock(cells, x, y);
-                                }
-
-                                if (j == 4) {
-                                    check = addTreasure(cells, x, y);
-                                    treasure = cells[x][y];
-                                }
-
-                                if (j == 5) {
-                                    check = addTortuga(cells, x, y);
-                                    tortuga = cells[x][y];
-                                }
-                                if (!check) {
-                                    System.out.println("Invalid input: Please enter valid positions!");
-                                    return;
-                                }
-                            }
-                        } else {
-                            String input = buffer.readLine();
-
-                            if (input.equals("") || input == null) {
-                                System.out.println("Invalid input: Please enter valid variant!");
-                                return;
-                            }
-
-                            // Parse the input
-                            variant = Integer.parseInt(input);
-                            buffer.close();
-
-                            // Validate the input
-                            if (variant < 1 || variant > 3) {
-                                System.out.println("Invalid input: Please enter valid variant!");
-                                return;
-                            }
-                        }
+                    // Validate the input
+                    if (!point.matches("[0-8],[0-8]")) {
+                        System.out.println("Invalid input: Please enter valid positions!");
+                        return;
                     }
-                } catch (IOException e) {
-                    System.out.println("Invalid input: Please enter valid input!");
-                    return;
+
+                    String[] position = point.split(",");
+                    int x = Integer.parseInt(position[0]);
+                    int y = Integer.parseInt(position[1]);
+                    boolean check = true;
+                    if (j == 0) {
+                        check = addJack(cells, x, y);
+                        jack = cells[x][y];
+                    }
+
+                    if (j == 1) {
+                        check = flyingDutchman(cells, x, y);
+                    }
+
+                    if (j == 2) {
+                        check = addKraken(cells, x, y);
+                    }
+
+                    if (j == 3) {
+                        check = addRock(cells, x, y);
+                    }
+
+                    if (j == 4) {
+                        check = addTreasure(cells, x, y);
+                        treasure = cells[x][y];
+                    }
+
+                    if (j == 5) {
+                        check = addTortuga(cells, x, y);
+                        tortuga = cells[x][y];
+                    }
+                    if (!check) {
+                        System.out.println("Invalid input: Please enter valid positions!");
+                        return;
+                    }
+                }
+                
+                // Got the ans
+                // Check if jack is in the same cell as the treasure
+                boolean jackHasRum = false;
+                if ((tortuga == null && jack.status.equals("rum")) || (jack.x == tortuga.x && jack.y == tortuga.y)) {
+                    jackHasRum = true;
+                }
+
+                // Backtracking call
+                double startBackTTime = System.nanoTime();
+                if(jack.content.equals("preKraken") || jack.content.equals("preDutchman")) {
+                    // instant death
+                    lostAstar++;
+                    lostBack++;
+                    durationAstar.add((double) 0);
+                    durationBacktrack.add((double) 0);
+                    continue;
+                }
+                Set<Cell> visited = new HashSet<Cell>();
+                Set<Cell> blocked = new HashSet<Cell>();
+                // the direct path from the jack to the treasure without forcing the jack to go
+                // through the tortuga
+                String directPath = backtrack(makeMapCopy(cells), visited, treasure, jack, blocked, jackHasRum);
+
+                String alternativePath = "";
+                String pathToTortuga = backtrack(makeMapCopy(cells), new HashSet<Cell>(), tortuga, jack, new HashSet<>(),
+                        jackHasRum);
+                if (pathToTortuga != null) { // if the jack can't reach the tortuga
+                    pathToTortuga = pathToTortuga.trim();
+                    String pathToTreasure = backtrack(makeMapCopy(cells), new HashSet<Cell>(), treasure, tortuga,
+                            new HashSet<>(), true);
+                    if (pathToTreasure != null) {
+                        ArrayList<String> temp = new ArrayList<>(Arrays.asList(pathToTreasure.split(" ")));
+                        temp.remove(0); // remove the first element
+                        pathToTreasure = String.join(" ", temp);
+                        alternativePath = pathToTortuga + " " + pathToTreasure;
+                    }
+                }
+
+                if (directPath == null && alternativePath.equals("")) {
+                    directPath = null;
+                } else if (directPath == null && !alternativePath.equals("")) {
+                    directPath = alternativePath;
+                } else if (!directPath.equals("") && alternativePath.equals("")) {
+                    // no need to do anything
+                } else {
+                    // compare the two paths and choose the shorter one
+                    if (directPath.split(" ").length > alternativePath.split(" ").length) {
+                        directPath = alternativePath;
+                    }
+                }
+
+                double endBackTTime = System.nanoTime();
+                double d = (endBackTTime - startBackTTime) / 1000000;
+
+                // Write the output of the backtracking algorithm to the file
+                if (directPath == null || directPath.equals("")) {
+                    lostBack++;
+                    durationBacktrack.add((double) 0);
+                } else {
+                    winBack++;
+                    durationBacktrack.add(d);
+                }
+
+                // A* algorithm
+                Set<Cell> open = new HashSet<Cell>();
+                Set<Cell> closed = new HashSet<Cell>();
+
+                closed.add(jack);
+                // Calculate time for the A* algorithm
+
+                long startTime = System.nanoTime();
+                String directPathAStart = aStar(makeMapCopy(cells), jack, treasure, jack.x, jack.y, open, closed, jackHasRum,
+                        variant);
+                // If path is null then the treasure is not reachable mayber because of the
+                String alternativePathAStart = "";
+                open = new HashSet<Cell>();
+                closed = new HashSet<Cell>();
+                closed.add(jack);
+
+                String pathToToutugaAStar = aStar(makeMapCopy(cells), jack, tortuga, jack.x, jack.y, open, closed, false,
+                        variant);
+                if (pathToToutugaAStar != null) {
+                    // Find shortest path to the treasure from the Tortuga
+                    open = new HashSet<Cell>();
+                    closed = new HashSet<Cell>();
+                    closed.add(tortuga);
+                    String pathFromTor = aStar(makeMapCopy(cells), tortuga, treasure, tortuga.x, tortuga.y, open, closed,
+                            true, variant);
+                    if (pathFromTor != null) {
+                        alternativePathAStart = pathToToutugaAStar.trim() + " " + pathFromTor.trim();
+                    }
+                }
+
+                // Compare the two paths
+                if (directPathAStart == null && alternativePathAStart.equals("")) {
+                    directPathAStart = null;
+                } else if (directPathAStart == null && !alternativePathAStart.equals("")) {
+                    directPathAStart = alternativePathAStart;
+                } else if (!directPathAStart.equals("") && alternativePathAStart.equals("")) {
+                    // no need to do anything
+                } else {
+                    // compare the two paths and choose the shorter one
+                    if (directPathAStart.split(" ").length > alternativePathAStart.split(" ").length) {
+                        directPathAStart = alternativePathAStart;
+                    }
+                }
+                long endTime = System.nanoTime();
+
+                long duration = (endTime - startTime) / 1000000;
+                // Write the output to the file
+                if (directPathAStart == null || directPathAStart.trim().equals("")) {
+                    lostAstar++;
+                    durationAstar.add((double) 0);
+                } else {
+                    winAstar++;
+                    durationAstar.add((double) duration);
+                }
+
+                if(lostAstar != lostBack) {
+                    System.out.println("Something is wrong");
                 }
             }
-            scanner.close();
-        } catch (NumberFormatException e) {
-            e.printStackTrace();
-        }
-
-        // Check if jack is in the same cell as the treasure
-        boolean jackHasRum = false;
-        if ((tortuga == null && jack.status.equals("rum")) || (jack.x == tortuga.x && jack.y == tortuga.y)) {
-            jackHasRum = true;
-        }
-
-        // Backtracking call
-        double startBackTTime = System.nanoTime();
-        if(jack.content.equals("preKraken") || jack.content.equals("preDutchman")) {
-            // instant death
-            printOutput("Lose", "outputBacktracking.txt");
-            printOutput("Lose", "outputAStar.txt");
+        } catch (IOException e) {
+            System.out.println("Invalid input: Please enter valid input!");
             return;
         }
 
-        Set<Cell> visited = new HashSet<Cell>();
-        Set<Cell> blocked = new HashSet<Cell>();
-        // the direct path from the jack to the treasure without forcing the jack to go
-        // through the tortuga
-        String directPath = backtrack(makeMapCopy(cells), visited, treasure, jack, blocked, jackHasRum);
-
-        String alternativePath = "";
-        String pathToTortuga = backtrack(makeMapCopy(cells), new HashSet<Cell>(), tortuga, jack, new HashSet<>(),
-                jackHasRum);
-        if (pathToTortuga != null) { // if the jack can't reach the tortuga
-            pathToTortuga = pathToTortuga.trim();
-            String pathToTreasure = backtrack(makeMapCopy(cells), new HashSet<Cell>(), treasure, tortuga, new HashSet<>(), true);
-            if (pathToTreasure != null) {
-                ArrayList<String> temp = new ArrayList<>(Arrays.asList(pathToTreasure.split(" ")));
-                temp.remove(0); // remove the first element
-                pathToTreasure = String.join(" ", temp);
-                alternativePath = pathToTortuga + " " + pathToTreasure;
-            }
-        }
-
-        if (directPath == null && alternativePath.equals("")) {
-            directPath = null;
-        } else if (directPath == null && !alternativePath.equals("")) {
-            directPath = alternativePath;
-        } else if (!directPath.equals("") && alternativePath.equals("")) {
-            // no need to do anything
-        } else {
-            // compare the two paths and choose the shorter one
-            if (directPath.split(" ").length > alternativePath.split(" ").length) {
-                directPath = alternativePath;
-            }
-        }
-
-        double endBackTTime = System.nanoTime();
-        double d = (endBackTTime - startBackTTime) / 1000000;
-
-        // Write the output of the backtracking algorithm to the file
-        if (directPath == null || directPath.equals("")) {
-            printOutput("Lose", "outputBacktracking.txt");
-        } else {
-            String output = "Win\n";
-            output += String.valueOf(directPath.split("]").length - 1) + "\n";
-            output += directPath + "\n";
-            // Write 2d map to the file
-            output += "-------------------\n";
-            output += "  0 1 2 3 4 5 6 7 8\n";
-            // Convert the string path to 2d array
-            String[] pathArray = directPath.split(" ");
-            String[][] path2dArray = new String[9][9];
-            for (int i = 0; i < pathArray.length; i++) {
-                String[] coordinates = pathArray[i].split(",");
-                int x = Integer.parseInt(coordinates[0].substring(1));
-                int y = Integer.parseInt(coordinates[1].substring(0, 1));
-                if (path2dArray[x][y] != null && path2dArray[x][y].equals("*")) {
-                    path2dArray[x][y] = "<>";
-                } else {
-                    path2dArray[x][y] = "*";
-                }
-            }
-
-            for (int i = 0; i < 9; i++) {
-                output += i + " ";
-                for (int j = 0; j < 9; j++) {
-                    if (path2dArray[i][j] == null) {
-                        output += "- ";
-                        continue;
-                    }
-                    if (path2dArray[i][j].equals("*")) {
-                        output += "* ";
-                    } else if (path2dArray[i][j].equals("<>")) {
-                        output += "<>";
-                    } else {
-                        output += "- ";
-                    }
-                }
-                output += "\n";
-            }
-
-            output += "-------------------\n";
-            output += String.valueOf(d) + " ms";
-
-            printOutput(output, "outputBacktracking.txt");
-        }
-
-        // A* algorithm
-        Set<Cell> open = new HashSet<Cell>();
-        Set<Cell> closed = new HashSet<Cell>();
-
-        closed.add(jack);
-        // Calculate time for the A* algorithm
-
-        long startTime = System.nanoTime();
-        String directPathAStart = aStar(makeMapCopy(cells), jack, treasure, jack.x, jack.y, open, closed, jackHasRum,
-                variant);
-        // If path is null then the treasure is not reachable mayber because of the
-        String alternativePathAStart = "";
-        open = new HashSet<Cell>();
-        closed = new HashSet<Cell>();
-        closed.add(jack);
-
-        String pathToToutugaAStar = aStar(makeMapCopy(cells), jack, tortuga, jack.x, jack.y, open, closed, false,
-                variant);
-        if (pathToToutugaAStar != null) {
-            // Find shortest path to the treasure from the Tortuga
-            open = new HashSet<Cell>();
-            closed = new HashSet<Cell>();
-            closed.add(tortuga);
-            String pathFromTor = aStar(makeMapCopy(cells), tortuga, treasure, tortuga.x, tortuga.y, open, closed,
-                    true, variant);
-            if (pathFromTor != null) {
-                alternativePathAStart = pathToToutugaAStar.trim() + " " + pathFromTor.trim();
-            }
-        }
-
-        // Compare the two paths
-        if (directPathAStart == null && alternativePathAStart.equals("")) {
-            directPathAStart = null;
-        } else if (directPathAStart == null && !alternativePathAStart.equals("")) {
-            directPathAStart = alternativePathAStart;
-        } else if (!directPathAStart.equals("") && alternativePathAStart.equals("")) {
-            // no need to do anything
-        } else {
-            // compare the two paths and choose the shorter one
-            if (directPathAStart.split(" ").length > alternativePathAStart.split(" ").length) {
-                directPathAStart = alternativePathAStart;
-            }
-        }
-        long endTime = System.nanoTime();
-
-        long duration = (endTime - startTime) / 1000000;
-        // Write the output to the file
-        if (directPathAStart == null || directPathAStart.trim().equals("")) {
-            printOutput("Lose", "outputAStar.txt");
-        } else {
-            String output = "Win\n";
-            output += String.valueOf(directPathAStart.split(" ").length) + "\n";
-            output += "[" + jack.x + "," + jack.y + "] " + directPathAStart + "\n";
-
-            // Convert the string path of [0-8] [0-8] to 2d map
-            String[] winningPathArray = directPathAStart.split(" ");
-            for (int i = 0; i < 9; i++) {
-                for (int j = 0; j < 9; j++) {
-                    for (int k = 0; k < directPathAStart.split(" ").length; k++) {
-                        String[] coordinates = winningPathArray[k].split(",");
-                        int x = Integer.parseInt(coordinates[0].substring(1));
-                        int y = Integer.parseInt(coordinates[1].substring(0, 1));
-                        if (i == x && j == y) {
-                            if (cells[i][j].content.equals("jack")) {
-                                cells[i][j].content = "<>";
-                            } else {
-                                cells[i][j].content = "jack";
-                            }
-                        }
-                    }
-                }
-            }
-
-            // Write 2d map to the file
-            output += "-------------------\n";
-            output += "  0 1 2 3 4 5 6 7 8\n";
-
-            for (int i = 0; i < 9; i++) {
-                output += i + " ";
-                for (int j = 0; j < 9; j++) {
-                    if (cells[i][j].content.equals("jack")) {
-                        output += "* ";
-                    } else if (cells[i][j].content.equals("<>")) {
-                        output += "<>";
-                    } else {
-                        output += "- ";
-                    }
-                }
-                output += "\n";
-            }
-            output += "-------------------\n";
-            output += String.valueOf(duration) + " ms";
-            printOutput(output, "outputAStar.txt");
-        }
+        System.out.println("Backtrack: " + winBack + " " + lostBack);
     }
 }
